@@ -1,23 +1,31 @@
 package com.suredigit.naftemporikihd;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.viewpagerindicator.CirclePageIndicator;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.viewpagerindicator.PageIndicator;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
+import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
-public class ArticlesViewActivity extends SherlockFragmentActivity {
+public class ArticlesViewActivity extends SherlockFragmentActivity implements ActionBar.OnNavigationListener{
 
 	//TestFragmentAdapter mAdapter;
 	ViewPager mPager;
@@ -27,6 +35,11 @@ public class ArticlesViewActivity extends SherlockFragmentActivity {
 	String mCategoryTitle;
 	public int mFontSize = 18;
 
+	String[] mRssTitles;
+	ArrayList<RssChannel> mRssChannels = new ArrayList<RssChannel>();
+
+	private int mNaviCounter = 0;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		if(MainActivity.pNightMode) {
@@ -35,8 +48,38 @@ public class ArticlesViewActivity extends SherlockFragmentActivity {
 			setTheme(R.style.Theme_Sherlock_Light_DarkActionBar);
 		//super.onCreate(savedInstanceState);
 		super.onCreate(null);
-		getSupportActionBar().setIcon(R.drawable.ic_naftemporiki);
+		//getSupportActionBar().setIcon(R.drawable.ic_naftemporiki);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+
+
+		SharedPreferences preferences = Singleton.getInstance().prefs;
+		Gson gson = new Gson();
+		String json = preferences.getString("channels","");
+		Type listType = new TypeToken<ArrayList<RssChannel>>() {}.getType();
+		mRssChannels = gson.fromJson(json,listType);		
+
+		ArrayList<String> rssChannels = new ArrayList<String>();
+		for (RssChannel myChan : mRssChannels){
+			if(myChan.isEnabled())
+				rssChannels.add(myChan.getTitle());
+		}
+		mRssTitles = new String[rssChannels.size()];
+		rssChannels.toArray(mRssTitles);
+
+		/** Create an array adapter to populate dropdownlist */
+		Context context = getSupportActionBar().getThemedContext();
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, R.layout.sherlock_spinner_item, mRssTitles);
+		adapter.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
+
+
+		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+		getSupportActionBar().setListNavigationCallbacks(adapter, this);
+		getSupportActionBar().setSelectedNavigationItem(2);
+
+
+
+
 		setContentView(R.layout.activity_articles_view);
 		// Show the Up button in the action bar.
 		//getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -44,6 +87,9 @@ public class ArticlesViewActivity extends SherlockFragmentActivity {
 
 		Bundle b = getIntent().getExtras();
 		RssChannel theChan = b.getParcelable("parcel");
+		
+		System.out.println("INDEX O FFFFF"+mRssChannels.indexOf(theChan));
+		
 		int position = b.getInt("position");
 		System.out.println(theChan.getTitle());
 		System.out.println(theChan.getArticles().get(position));
@@ -115,7 +161,7 @@ public class ArticlesViewActivity extends SherlockFragmentActivity {
 			String shareTextB = theArticleB.getLink();
 			Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(shareTextB));
 			startActivity(browserIntent);
-			
+
 			return true;
 		case R.id.menu_share:
 			String shareText = "";
@@ -195,6 +241,20 @@ public class ArticlesViewActivity extends SherlockFragmentActivity {
 			return true;			
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+		if (mNaviCounter != 0){
+			System.out.println("Selected: " + mRssTitles[itemPosition]);
+			//		Intent intent = new Intent(ArticlesViewActivity.this, ArticlesViewActivity.class);
+			//		intent.putExtra("parcel", mRssChannels.get(1));
+			//		intent.putExtra("position", 0);
+			//		startActivity(intent);
+			//		return false;
+		}
+		mNaviCounter++;
+		return false;
 	}
 
 }

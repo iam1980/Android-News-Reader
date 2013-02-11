@@ -243,31 +243,33 @@ public class MainActivity extends SherlockActivity  {
 
 	}
 
-
+	private void parseChannels(){
+		//*** - PARSE XML START		
+				for (RssChannel theChan : mRssChannels){
+					if(!(theChan.getHtml() == null)){
+						try {
+							Document doc = NaftemporikiParsers.parseXML(theChan.getHtml());
+							theChan.setArticles(NaftemporikiParsers.populateArticles(doc));
+							if(!(theChan.getArticles()== null)){
+								System.out.println(theChan.getArticles().size());
+								for (Article theArticle: theChan.getArticles()){
+									//theArticle.setParentRssChan(theChan);
+								}
+							}
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} 
+						if (!(theChan.getArticles() == null))
+							Collections.reverse((ArrayList<Article>) theChan.getArticles());
+					}
+				}
+				//*** - PARSE XML END
+		
+	}
 
 	private void buildUI(){
-		//*** - PARSE XML START		
-		for (RssChannel theChan : mRssChannels){
-			if(!(theChan.getHtml() == null)){
-				try {
-					Document doc = NaftemporikiParsers.parseXML(theChan.getHtml());
-					theChan.setArticles(NaftemporikiParsers.populateArticles(doc));
-					if(!(theChan.getArticles()== null)){
-						System.out.println(theChan.getArticles().size());
-						for (Article theArticle: theChan.getArticles()){
-							//theArticle.setParentRssChan(theChan);
-						}
-					}
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} 
-				if (!(theChan.getArticles() == null))
-					Collections.reverse((ArrayList<Article>) theChan.getArticles());
-			}
-		}
-		//*** - PARSE XML END
-
+		
 		//*** - BUILD HORIZONTALLISTVIEWS START
 		myLinList =(LinearLayout) findViewById(R.id.LinearLayout1);
 
@@ -430,7 +432,7 @@ public class MainActivity extends SherlockActivity  {
 		case R.id.menu_rss:
 			System.out.println("RSS");
 
-			Intent myIntent = new Intent(MainActivity.this, MultipleChoiceListView.class);
+			Intent myIntent = new Intent(MainActivity.this, SelectRssChannelsActivity.class);
 			MainActivity.this.startActivity(myIntent);
 
 			return true;
@@ -499,6 +501,7 @@ public class MainActivity extends SherlockActivity  {
 			if (unfinishedTasks == 1){
 				//We are all done. 1 Because its the current one that hasnt finished post execute
 				System.out.println("ALLLLLLLLLLLLLLL DONE");
+				parseChannels();
 				buildUI();
 				updateThumbnails();
 				mProgressDialog.dismiss();

@@ -25,7 +25,7 @@ import com.mobeta.android.dslv.DragSortListView.RemoveListener;
 
 
 
-public class MultipleChoiceListView extends ListActivity
+public class SelectRssChannelsActivity extends ListActivity
 {
 	private ArrayAdapter<RssChannel> adapter;
 	ArrayList<RssChannel> mRssChannels = new ArrayList<RssChannel>();

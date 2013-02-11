@@ -35,7 +35,7 @@
                 android:value="com.suredigit.naftemporikihd.MainActivity" />
         </activity>
         <activity
-            android:name="com.suredigit.naftemporikihd.MultipleChoiceListView"
+            android:name="com.suredigit.naftemporikihd.SelectRssChannelsActivity"
             android:label="Επιλογή"
             android:parentActivityName="com.suredigit.naftemporikihd.MainActivity"
             android:theme="@android:style/Theme.Light" >
