@@ -119,7 +119,7 @@ public class MainActivity extends SherlockActivity  {
 		mRssChannels = gson.fromJson(json,listType);
 
 	}
-	
+
 	@Override
 	public void onAttachedToWindow() {
 		super.onAttachedToWindow();
@@ -283,12 +283,23 @@ public class MainActivity extends SherlockActivity  {
 				hLparams.height  = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 150, getResources().getDisplayMetrics());
 				hListView.setLayoutParams(hLparams);
 
+//				LinearLayout viewFooter = new LinearLayout(this);
+//				viewFooter.setOrientation(LinearLayout.HORIZONTAL);
+//				LayoutParams lp = new LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, 50);
+//				viewFooter.setLayoutParams(lp);
+//
+//				//hListView.addFooterView(viewFooter, null, false);
+//				hListView.addView(viewFooter, 50, 50);
+
 
 				TextView channTitleTV = new TextView(this);
 				channTitleTV.setText(theChan.getTitle());
 				channTitleTV.setTextAppearance(this, android.R.style.TextAppearance_Medium);
 				channTitleTV.setTextSize(15);
 				channTitleTV.setTypeface(null,Typeface.BOLD);
+				LinearLayout.LayoutParams channTitleTVparams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				channTitleTVparams.setMargins(2, 2, 0, 8); //substitute parameters for left, top, right, bottom
+				channTitleTV.setLayoutParams(channTitleTVparams);
 
 				TextView spacerTV = new TextView(this);
 
@@ -315,6 +326,8 @@ public class MainActivity extends SherlockActivity  {
 
 					}}
 						);
+				
+				
 			}
 		}
 		//*** - BUILD HORIZONTALLISTVIEWS END
