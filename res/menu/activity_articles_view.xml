@@ -1,0 +1,34 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_settings"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/menu_settings">
+        <item
+            android:id="@+id/menu_night"
+            android:checkable="true"
+            android:title="Night Mode"
+            android:titleCondensed="Night Mode"/>
+        <item
+            android:id="@+id/menu_inc_font"
+            android:title="Increase Text"
+            android:titleCondensed="Increase Text"/>
+        <item
+            android:id="@+id/menu_dec_font"
+            android:title="Decrease Text"
+            android:titleCondensed="Decrease Text"/>
+        <item
+            android:id="@+id/menu_browser"
+            android:title="Open Original"
+            android:titleCondensed="Open Original"/>
+    </item>
+    <item
+        android:id="@+id/menu_share"
+        android:icon="@drawable/ic_menu_share_holo_dark"
+        android:orderInCategory="99"
+        android:showAsAction="always"
+        android:title="Share">
+    </item>
+
+</menu>
