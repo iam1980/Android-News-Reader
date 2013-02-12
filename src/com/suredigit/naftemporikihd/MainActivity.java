@@ -409,7 +409,10 @@ public class MainActivity extends SherlockActivity  {
 
 			builder.setTitle(R.string.app_name);
 			AlertDialog alert = builder.create();
-			alert.show();
+			//alert.show();
+			Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+			startActivity(intent);
+			
 			return true;		
 		}
 
