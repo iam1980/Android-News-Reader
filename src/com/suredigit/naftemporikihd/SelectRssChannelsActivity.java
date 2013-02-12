@@ -7,8 +7,11 @@ import java.util.List;
 
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +20,8 @@ import android.widget.CheckedTextView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.MenuItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mobeta.android.dslv.DragSortListView;
@@ -25,10 +30,12 @@ import com.mobeta.android.dslv.DragSortListView.RemoveListener;
 
 
 
-public class SelectRssChannelsActivity extends ListActivity
+public class SelectRssChannelsActivity extends SherlockListActivity
 {
 	private ArrayAdapter<RssChannel> adapter;
 	ArrayList<RssChannel> mRssChannels = new ArrayList<RssChannel>();
+	
+	private boolean mChangesMade = false;
 
 	private DragSortListView.DropListener onDrop =
 			new DragSortListView.DropListener() {
@@ -40,11 +47,14 @@ public class SelectRssChannelsActivity extends ListActivity
 				adapter.remove(item);
 				adapter.insert(item, to);
 				list.moveCheckState(from, to);
-				SharedPreferences.Editor editor = Singleton.getInstance().prefs.edit();
-				Gson gson = new Gson();
-				String json = gson.toJson(mRssChannels); 
-				editor.putString("channels",json);
-				editor.commit();
+				
+				mChangesMade = true;
+				
+//				SharedPreferences.Editor editor = Singleton.getInstance().prefs.edit();
+//				Gson gson = new Gson();
+//				String json = gson.toJson(mRssChannels); 
+//				editor.putString("channels",json);
+//				editor.commit();
 			}
 		}
 	};
@@ -102,10 +112,13 @@ public class SelectRssChannelsActivity extends ListActivity
 //		Gson gson = new Gson();
 //		String jsonDef = gson.toJson(defaultRssChannels); 
 
-		Gson gson = new Gson();
-		String json = preferences.getString("channels","");
-		Type listType = new TypeToken<ArrayList<RssChannel>>() {}.getType();
-		mRssChannels = gson.fromJson(json,listType);
+//		Gson gson = new Gson();
+//		String json = preferences.getString("channels","");
+//		Type listType = new TypeToken<ArrayList<RssChannel>>() {}.getType();
+//		mRssChannels = gson.fromJson(json,listType);
+		
+		mRssChannels = MainActivity.loadChannelsFromFile();
+		
 
 		//String[] array = {"Cheese", "Pepperoni", "Black Olives"};
 		//ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(array));
@@ -133,11 +146,13 @@ public class SelectRssChannelsActivity extends ListActivity
 			chan.setEnabled(false);
 		else chan.setEnabled(true);
 		
-		SharedPreferences.Editor editor = Singleton.getInstance().prefs.edit();
-		Gson gson = new Gson();
-		String json = gson.toJson(mRssChannels); 
-		editor.putString("channels",json);
-		editor.commit();
+		mChangesMade = true;
+		
+//		SharedPreferences.Editor editor = Singleton.getInstance().prefs.edit();
+//		Gson gson = new Gson();
+//		String json = gson.toJson(mRssChannels); 
+//		editor.putString("channels",json);
+//		editor.commit();
 	}
 
 
@@ -176,5 +191,50 @@ public class SelectRssChannelsActivity extends ListActivity
 			return v;
 		}
 
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			// This ID represents the Home or Up button. In the case of this
+			// activity, the Up button is shown. Use NavUtils to allow users
+			// to navigate up one level in the application structure. For
+			// more details, see the Navigation pattern on Android Design:
+			//
+			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
+			//
+			System.out.println("HOME CLICKED");
+			//finish();
+			
+			if(mChangesMade){
+				saveChanges();
+				NavUtils.navigateUpFromSameTask(this);
+			} else 
+				finish();
+			
+			return true;
+			
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
+	@Override
+	public void onBackPressed() {
+		if(mChangesMade){
+			saveChanges();
+			NavUtils.navigateUpFromSameTask(this);
+		} else 
+			finish();
+	}
+	
+	private void saveChanges(){
+//		SharedPreferences.Editor editor = Singleton.getInstance().prefs.edit();
+//		Gson gson = new Gson();
+//		String json = gson.toJson(mRssChannels); 
+//		editor.putString("channels",json);
+//		editor.commit();	
+		
+		MainActivity.saveChannelsToFile(mRssChannels);
 	}
 }

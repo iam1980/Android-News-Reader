@@ -2,7 +2,10 @@ package com.suredigit.naftemporikihd;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -88,16 +91,44 @@ public class NaftemporikiParsers {
 						int yF = getParamValue(imgUrl,"height");
 						
 						imgUrl = imgUrl.replace("&width="+xF,"&width=768");
-						imgUrl = imgUrl.replace("&height="+yF,"&height=330");
+						imgUrl = imgUrl.replace("&height="+yF,"&height=450");
 						
-						//text = text.replaceAll("&nbsp;", " ");
-						//text = text.replaceAll("\u00a0","");
-						text = text.replaceAll("(\r\n|\n)", "<br />");
-						
+				
 						//System.out.println(imgUrl);
 					}
 
-					articles.add(new Article(title,link,publDate,text,thumbURL,imgUrl));
+					//text = text.replaceAll("&nbsp;", " ");
+					//text = text.replaceAll("\u00a0","");
+					text = text.replaceAll("(\r\n|\n)", "<br />");
+					text = text.replaceAll("\t", "");
+					
+					
+					//Date stuff
+					String fmtDate = "";
+					String theDate = publDate;
+					SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd kk:mm");
+					SimpleDateFormat fmtFirst = new SimpleDateFormat(", d ");
+					SimpleDateFormat fmtMonth = new SimpleDateFormat("MMMM");
+					SimpleDateFormat fmtSecond = new SimpleDateFormat(" yyyy kk:mm");		
+					SimpleDateFormat fmtDay = new SimpleDateFormat("EEEE");
+					try {
+				        Date date = fmt.parse(theDate);
+				        
+				        String dayEng = fmtDay.format(date);
+				        String dayGr = GreekDatesHelper.getGreekDay(dayEng);
+				        
+				        String monthEng = fmtMonth.format(date);
+				        String monthGR = GreekDatesHelper.getGreekMonth(monthEng,true);
+				        
+				        fmtDate  = dayGr + fmtFirst.format(date) + monthGR + fmtSecond.format(date);
+				        
+				    }
+				    catch(ParseException pe) {
+				    	pe.printStackTrace();
+				    	fmtDate = theDate;   
+				    }
+					
+					articles.add(new Article(title,link,publDate,fmtDate,text,thumbURL,imgUrl));
 					
 				}
 

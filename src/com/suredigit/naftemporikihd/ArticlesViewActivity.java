@@ -1,21 +1,16 @@
 package com.suredigit.naftemporikihd;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.viewpagerindicator.PageIndicator;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -23,7 +18,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.widget.ArrayAdapter;
-import android.widget.Toast;
 
 public class ArticlesViewActivity extends SherlockFragmentActivity implements ActionBar.OnNavigationListener{
 
@@ -39,6 +33,8 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 	ArrayList<RssChannel> mRssChannels = new ArrayList<RssChannel>();
 
 	private int mNaviCounter = 0;
+	
+	private int mChanPos;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +49,13 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 
 
 
-		SharedPreferences preferences = Singleton.getInstance().prefs;
-		Gson gson = new Gson();
-		String json = preferences.getString("channels","");
-		Type listType = new TypeToken<ArrayList<RssChannel>>() {}.getType();
-		mRssChannels = gson.fromJson(json,listType);		
+//		SharedPreferences preferences = Singleton.getInstance().prefs;
+//		Gson gson = new Gson();
+//		String json = preferences.getString("channels","");
+//		Type listType = new TypeToken<ArrayList<RssChannel>>() {}.getType();
+//		mRssChannels = gson.fromJson(json,listType);
+		
+		mRssChannels = MainActivity.loadChannelsFromFile();
 
 		ArrayList<String> rssChannels = new ArrayList<String>();
 		for (RssChannel myChan : mRssChannels){
@@ -75,7 +73,7 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 
 		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 		getSupportActionBar().setListNavigationCallbacks(adapter, this);
-		getSupportActionBar().setSelectedNavigationItem(2);
+
 
 
 
@@ -108,6 +106,9 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 		indicator.setFades(false);
 		indicator.setCurrentItem(position);
 		mIndicator = indicator;
+		
+		mChanPos = b.getInt("chanPos");
+		getSupportActionBar().setSelectedNavigationItem(mChanPos);
 
 	}
 
@@ -118,7 +119,7 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 
 		@Override
 		public int getCount() {
-			return mChannel.getArticles().size();
+			return mChannel.getArticles().size()-1;
 		}
 
 		@Override
@@ -194,6 +195,7 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 			Intent intent = new Intent(this, ArticlesViewActivity.class);
 			intent.putExtra("parcel", mChannel);
 			intent.putExtra("position", position);
+			intent.putExtra("chanPos", mChanPos);
 			intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 			startActivity(intent);
 
@@ -211,6 +213,7 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 				Intent intentInc = new Intent(this, ArticlesViewActivity.class);
 				intentInc.putExtra("parcel", mChannel);
 				intentInc.putExtra("position", positionInc);
+				intentInc.putExtra("chanPos", mChanPos);
 				intentInc.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 				startActivity(intentInc);
 
@@ -231,6 +234,7 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 				Intent intentDec = new Intent(this, ArticlesViewActivity.class);
 				intentDec.putExtra("parcel", mChannel);
 				intentDec.putExtra("position", positionDec);
+				intentDec.putExtra("chanPos", mChanPos);
 				intentDec.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 				startActivity(intentDec);
 
@@ -247,11 +251,15 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
 		if (mNaviCounter != 0){
 			System.out.println("Selected: " + mRssTitles[itemPosition]);
-			//		Intent intent = new Intent(ArticlesViewActivity.this, ArticlesViewActivity.class);
-			//		intent.putExtra("parcel", mRssChannels.get(1));
-			//		intent.putExtra("position", 0);
-			//		startActivity(intent);
-			//		return false;
+			finish();
+			overridePendingTransition(0, 0);
+			Intent intent = new Intent(ArticlesViewActivity.this, ArticlesViewActivity.class);
+			intent.putExtra("parcel", mRssChannels.get(MainActivity.getRealChanPositionByTitle(mRssTitles[itemPosition])));
+			intent.putExtra("position", 0);
+			intent.putExtra("chanPos", MainActivity.getPositionInEnabledChannelsByTitle(mRssTitles[itemPosition]));
+			System.out.println("OKOKO"+MainActivity.getPositionInEnabledChannelsByTitle(mRssTitles[itemPosition]));
+			startActivity(intent);
+			return false;
 		}
 		mNaviCounter++;
 		return false;

@@ -8,13 +8,14 @@ public class Article implements Parcelable{
 	private String title;
 	private String link;
 	private String date;
+	private String dateGr;
 	private String imgUrl;
 	private String thumbUrl;
-//	private Bitmap img = null;
 	private String text;
+	private boolean isDummy;
 	//private RssChannel parentRssChan;
 	
-	public Article(String title, String link, String date, String text, String thumbUrl, String imgUrl) {
+	public Article(String title, String link, String date, String dateGR, String text, String thumbUrl, String imgUrl) {
 		super();
 		this.title = title;
 		this.link = link;
@@ -22,6 +23,13 @@ public class Article implements Parcelable{
 		this.text = text;
 		this.thumbUrl = thumbUrl;
 		this.imgUrl = imgUrl;
+		this.isDummy = false;
+		this.dateGr = dateGR;
+	}
+	
+	public Article(String dummy){
+		title = "DUMMYARTICLE";
+		this.isDummy = true;
 	}
 
 	private Article(Parcel in) {
@@ -30,6 +38,7 @@ public class Article implements Parcelable{
 		date = in.readString();
 		imgUrl = in.readString();
 		text = in.readString();
+		dateGr = in.readString();
 	}
 
 	public String getTitle() {
@@ -85,6 +94,18 @@ public class Article implements Parcelable{
 		this.thumbUrl = thumbUrl;
 	}
 
+	public boolean isDummy() {
+		return isDummy;
+	}
+	
+	public String getDateGr() {
+		return dateGr;
+	}
+
+	public void setDateGr(String dateGr) {
+		this.dateGr = dateGr;
+	}
+
 	@Override
 	public int describeContents() {
 		// TODO Auto-generated method stub
@@ -98,6 +119,7 @@ public class Article implements Parcelable{
 		dest.writeString(date);
 		dest.writeString(imgUrl);
 		dest.writeString(text);
+		dest.writeString(dateGr);
 		
 	}
 	

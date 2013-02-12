@@ -53,8 +53,11 @@
             android:id="@+id/imageViewPhoto"
             android:layout_width="fill_parent"
             android:layout_height="250dip"
-            android:adjustViewBounds="true"
-            android:background="#000" />
+            android:adjustViewBounds="false"
+            android:background="#000"
+            android:scaleType="centerCrop"
+            android:clickable="true"
+             />
 
         <TextView
             android:id="@+id/textViewArticleContent"

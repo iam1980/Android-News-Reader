@@ -1,13 +1,25 @@
 package com.suredigit.naftemporikihd;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Html;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -63,26 +75,78 @@ public final class ArticleFragment extends Fragment {
 		TextView tvDate = (TextView)v.findViewById(R.id.textViewDate);
 		TextView tvTitle = (TextView)v.findViewById(R.id.textViewTitle);
 		tvContent = (TextView)v.findViewById(R.id.textViewArticleContent);
-		
+
 		ArticlesViewActivity pActivity = (ArticlesViewActivity) getActivity();
-		
+
 		tvContent.setTextSize(MainActivity.pFontSize);
 
 		ivPhoto = (ImageView)v.findViewById(R.id.imageViewPhoto);
 
 		tvCategory.setText(mCategoryTitle);
 		tvTitle.setText(mArticle.getTitle());
-		tvDate.setText(mArticle.getDate());
+
+		tvDate.setText(mArticle.getDateGr());
+		//
 
 		if(!(mArticle.getImgUrl() == null)){
 			imageDownloader.download(mArticle.getImgUrl(), (ImageView) ivPhoto);
+			ivPhoto.setOnClickListener(new View.OnClickListener() {
+				//@Override
+				public void onClick(View v) {
+					Log.v(TAG, " click"); 
+
+					if (ivPhoto.getDrawable() instanceof BitmapDrawable){
+//						Bitmap bitmap = ((BitmapDrawable)ivPhoto.getDrawable()).getBitmap();
+//						System.out.println(bitmap.getRowBytes());
+//
+//
+//						FileOutputStream fos;
+//						try {
+//							fos = getActivity().openFileOutput("TMPIMG", Context.MODE_PRIVATE);
+//							bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+//							fos.close();
+//
+//						} catch (FileNotFoundException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+						File cacheDir = getActivity().getBaseContext().getCacheDir();
+						File f = new File(cacheDir, "pic");
+
+                        try {
+                            FileOutputStream out = new FileOutputStream(f);
+                            Bitmap bitmap = ((BitmapDrawable)ivPhoto.getDrawable()).getBitmap();
+                            bitmap.compress(
+                                    Bitmap.CompressFormat.JPEG,
+                                    100, out);
+                            out.flush();
+                            out.close();
+                            System.out.println("FILE SAVED");
+
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }						
+						
+						Intent intent = new Intent(getActivity(), FullscreenActivity.class);
+						intent.putExtra("title", mArticle.getTitle());
+						startActivity(intent);
+					}
+				}        
+			});
+
+
 		} else {
 			ivPhoto.setVisibility(View.GONE);
 		}
 
 		if(!(mArticle.getText() == null))
 			tvContent.setText(Html.fromHtml(mArticle.getText()));
-			//tvContent.setText((mArticle.getText()));
+		//tvContent.setText((mArticle.getText()));
 		//Log.i(TAG,mArticle.getText());
 
 
@@ -91,11 +155,11 @@ public final class ArticleFragment extends Fragment {
 		theScroll.smoothScrollTo(0, 0);
 
 
-		
+
 		return v;
 	}
-	
-	
+
+
 
 	public float getCurrentFontSize(){
 		float sizePix = tvContent.getTextSize();
@@ -130,7 +194,7 @@ public final class ArticleFragment extends Fragment {
 		float scaledDensity = context.getResources().getDisplayMetrics().scaledDensity;
 		return px/scaledDensity;
 	}
-	
+
 
 
 }
