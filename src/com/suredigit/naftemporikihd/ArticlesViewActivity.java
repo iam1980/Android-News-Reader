@@ -17,10 +17,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 
 public class ArticlesViewActivity extends SherlockFragmentActivity implements ActionBar.OnNavigationListener{
 
+	private static final String TAG = "Arti. View Activity";
+	
 	//TestFragmentAdapter mAdapter;
 	ViewPager mPager;
 	PageIndicator mIndicator;
@@ -35,6 +38,8 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 	private int mNaviCounter = 0;
 	
 	private int mChanPos;
+	
+	public static ImageDownloader imageDownloader = new ImageDownloader();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +52,9 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 		//getSupportActionBar().setIcon(R.drawable.ic_naftemporiki);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-
+		Log.e(TAG,"CLEARING CACHE");
+		imageDownloader.clearCache();
+		
 
 //		SharedPreferences preferences = Singleton.getInstance().prefs;
 //		Gson gson = new Gson();

@@ -9,7 +9,6 @@ import com.actionbarsherlock.view.MenuItem;
 import com.suredigit.naftemporikihd.util.SystemUiHider;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
@@ -27,7 +26,7 @@ import android.support.v4.app.NavUtils;
  * 
  * @see SystemUiHider
  */
-public class FullscreenActivity extends SherlockActivity {
+public class FullscreenPhotoViewerActivity extends SherlockActivity {
 	/**
 	 * Whether or not the system UI should be auto-hidden after
 	 * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -44,7 +43,7 @@ public class FullscreenActivity extends SherlockActivity {
 	 * If set, will toggle the system UI visibility upon interaction. Otherwise,
 	 * will show the system UI visibility upon interaction.
 	 */
-	private static final boolean TOGGLE_ON_CLICK = false;
+	private static final boolean TOGGLE_ON_CLICK = true;
 
 	/**
 	 * The flags to pass to {@link SystemUiHider#getInstance}.
@@ -56,17 +55,21 @@ public class FullscreenActivity extends SherlockActivity {
 	 */
 	private SystemUiHider mSystemUiHider;
 
+	private String mTitle;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.activity_fullscreen);
+		setContentView(R.layout.activity_fullscreen_photo_viewer);
 		setupActionBar();
-
-
+		
+		final View controlsView = findViewById(R.id.fullscreen_content_controls);
+		final ImageView contentView = (ImageView)findViewById(R.id.fullscreen_content);
+		
 		Bundle b = getIntent().getExtras();
-		String title = b.getString("title");
-		getSupportActionBar().setTitle(title);
+		mTitle = b.getString("title");
+
 		//getSupportActionBar().hide();
 
 		File cacheDir = getBaseContext().getCacheDir();
@@ -80,23 +83,7 @@ public class FullscreenActivity extends SherlockActivity {
 		}
 		Bitmap bitmap = BitmapFactory.decodeStream(fis);
 
-		final ImageView contentView = (ImageView) findViewById(R.id.fullscreen_content);
 		contentView.setImageBitmap(bitmap);
-
-
-
-		Button closeBtn = (Button) findViewById(R.id.dummy_button);
-		closeBtn.setOnClickListener(new View.OnClickListener() {
-			   //@Override
-			   public void onClick(View v) {
-			      finish();       
-			   }        
-			});
-
-
-
-		final View controlsView = findViewById(R.id.fullscreen_content_controls);
-		//final View contentView = findViewById(R.id.fullscreen_content);
 
 		// Set up an instance of SystemUiHider to control the system UI for
 		// this activity.
@@ -104,53 +91,55 @@ public class FullscreenActivity extends SherlockActivity {
 				HIDER_FLAGS);
 		mSystemUiHider.setup();
 		mSystemUiHider
-		.setOnVisibilityChangeListener(new SystemUiHider.OnVisibilityChangeListener() {
-			// Cached values.
-			int mControlsHeight;
-			int mShortAnimTime;
+				.setOnVisibilityChangeListener(new SystemUiHider.OnVisibilityChangeListener() {
+					// Cached values.
+					int mControlsHeight;
+					int mShortAnimTime;
 
-			@Override
-			@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-			public void onVisibilityChange(boolean visible) {
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-					// If the ViewPropertyAnimator API is available
-					// (Honeycomb MR2 and later), use it to animate the
-					// in-layout UI controls at the bottom of the
-					// screen.
-					if (mControlsHeight == 0) {
-						mControlsHeight = controlsView.getHeight();
-					}
-					if (mShortAnimTime == 0) {
-						mShortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-					}
-					controlsView
-					.animate()
-					.translationY(visible ? 0 : mControlsHeight)
-					.setDuration(0);
-				} else {
-					// If the ViewPropertyAnimator APIs aren't
-					// available, simply show or hide the in-layout UI
-					// controls.
-					controlsView.setVisibility(visible ? View.VISIBLE : View.GONE);
-				}
+					@Override
+					@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+					public void onVisibilityChange(boolean visible) {
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+							// If the ViewPropertyAnimator API is available
+							// (Honeycomb MR2 and later), use it to animate the
+							// in-layout UI controls at the bottom of the
+							// screen.
+							if (mControlsHeight == 0) {
+								mControlsHeight = controlsView.getHeight();
+							}
+							if (mShortAnimTime == 0) {
+								mShortAnimTime = getResources().getInteger(
+										android.R.integer.config_shortAnimTime);
+							}
+							controlsView
+									.animate()
+									.translationY(visible ? 0 : mControlsHeight)
+									.setDuration(mShortAnimTime);
+						} else {
+							// If the ViewPropertyAnimator APIs aren't
+							// available, simply show or hide the in-layout UI
+							// controls.
+							controlsView.setVisibility(visible ? View.VISIBLE
+									: View.GONE);
+						}
 
-				if (visible && AUTO_HIDE) {
-					// Schedule a hide().
-					delayedHide(AUTO_HIDE_DELAY_MILLIS);
-				}
-			}
-		});
+						if (visible && AUTO_HIDE) {
+							// Schedule a hide().
+							delayedHide(AUTO_HIDE_DELAY_MILLIS);
+						}
+					}
+				});
 
 		// Set up the user interaction to manually show or hide the system UI.
 		contentView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				finish();
-				if (TOGGLE_ON_CLICK) {
-					mSystemUiHider.toggle();
-				} else {
-					mSystemUiHider.show();
-				}
+//				if (TOGGLE_ON_CLICK) {
+//					mSystemUiHider.toggle();
+//				} else {
+//					mSystemUiHider.show();
+//				}
 			}
 		});
 
@@ -159,6 +148,14 @@ public class FullscreenActivity extends SherlockActivity {
 		// while interacting with the UI.
 		findViewById(R.id.dummy_button).setOnTouchListener(
 				mDelayHideTouchListener);
+		
+		Button closeBtn = (Button) findViewById(R.id.dummy_button);
+		closeBtn.setOnClickListener(new View.OnClickListener() {
+			   //@Override
+			   public void onClick(View v) {
+			      finish();       
+			   }        
+			});
 	}
 
 	@Override
@@ -178,7 +175,8 @@ public class FullscreenActivity extends SherlockActivity {
 	private void setupActionBar() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			// Show the Up button in the action bar.
-			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+			getSupportActionBar().setTitle(mTitle);
+			getActionBar().setDisplayHomeAsUpEnabled(true);
 		}
 	}
 

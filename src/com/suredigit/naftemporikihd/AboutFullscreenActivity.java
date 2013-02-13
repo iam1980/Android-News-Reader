@@ -1,25 +1,24 @@
 package com.suredigit.naftemporikihd;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.suredigit.naftemporikihd.util.SystemUiHider;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 import android.support.v4.app.NavUtils;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -27,7 +26,7 @@ import android.support.v4.app.NavUtils;
  * 
  * @see SystemUiHider
  */
-public class FullscreenActivity extends SherlockActivity {
+public class AboutFullscreenActivity extends SherlockActivity {
 	/**
 	 * Whether or not the system UI should be auto-hidden after
 	 * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -44,7 +43,7 @@ public class FullscreenActivity extends SherlockActivity {
 	 * If set, will toggle the system UI visibility upon interaction. Otherwise,
 	 * will show the system UI visibility upon interaction.
 	 */
-	private static final boolean TOGGLE_ON_CLICK = false;
+	private static final boolean TOGGLE_ON_CLICK = true;
 
 	/**
 	 * The flags to pass to {@link SystemUiHider#getInstance}.
@@ -60,43 +59,19 @@ public class FullscreenActivity extends SherlockActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.activity_fullscreen);
+		setContentView(R.layout.activity_about_fullscreen);
 		setupActionBar();
 
-
-		Bundle b = getIntent().getExtras();
-		String title = b.getString("title");
-		getSupportActionBar().setTitle(title);
-		//getSupportActionBar().hide();
-
-		File cacheDir = getBaseContext().getCacheDir();
-		File f = new File(cacheDir, "pic");     
-		FileInputStream fis = null;
-		try {
-			fis = new FileInputStream(f);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		Bitmap bitmap = BitmapFactory.decodeStream(fis);
-
-		final ImageView contentView = (ImageView) findViewById(R.id.fullscreen_content);
-		contentView.setImageBitmap(bitmap);
-
-
-
-		Button closeBtn = (Button) findViewById(R.id.dummy_button);
-		closeBtn.setOnClickListener(new View.OnClickListener() {
-			   //@Override
-			   public void onClick(View v) {
-			      finish();       
-			   }        
-			});
-
-
-
 		final View controlsView = findViewById(R.id.fullscreen_content_controls);
-		//final View contentView = findViewById(R.id.fullscreen_content);
+		final View contentView = findViewById(R.id.fullscreen_content);
+		final TextView tVcontents = (TextView)findViewById(R.id.textViewContents);
+		final Button btnOK = (Button)findViewById(R.id.btn_ok);
+		final Button btnRate = (Button)findViewById(R.id.btn_rate);
+		
+		
+		
+		tVcontents.setText(Html.fromHtml(getString(R.string.about_html)));
+		tVcontents.setMovementMethod(LinkMovementMethod.getInstance());
 
 		// Set up an instance of SystemUiHider to control the system UI for
 		// this activity.
@@ -121,17 +96,19 @@ public class FullscreenActivity extends SherlockActivity {
 						mControlsHeight = controlsView.getHeight();
 					}
 					if (mShortAnimTime == 0) {
-						mShortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+						mShortAnimTime = getResources().getInteger(
+								android.R.integer.config_shortAnimTime);
 					}
 					controlsView
 					.animate()
 					.translationY(visible ? 0 : mControlsHeight)
-					.setDuration(0);
+					.setDuration(mShortAnimTime);
 				} else {
 					// If the ViewPropertyAnimator APIs aren't
 					// available, simply show or hide the in-layout UI
 					// controls.
-					controlsView.setVisibility(visible ? View.VISIBLE : View.GONE);
+					controlsView.setVisibility(visible ? View.VISIBLE
+							: View.GONE);
 				}
 
 				if (visible && AUTO_HIDE) {
@@ -145,7 +122,6 @@ public class FullscreenActivity extends SherlockActivity {
 		contentView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				finish();
 				if (TOGGLE_ON_CLICK) {
 					mSystemUiHider.toggle();
 				} else {
@@ -153,11 +129,31 @@ public class FullscreenActivity extends SherlockActivity {
 				}
 			}
 		});
+		
+		btnOK.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				finish();
+			}
+		});
+		
+		btnRate.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				Uri uri = Uri.parse("market://details?id=" + AboutFullscreenActivity.this.getPackageName());
+				Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+				try {
+				  startActivity(goToMarket);
+				} catch (ActivityNotFoundException e) {
+				  Toast.makeText(AboutFullscreenActivity.this, "Couldn't launch the market", Toast.LENGTH_LONG).show();
+				}
+			}
+		});
 
 		// Upon interacting with UI controls, delay any scheduled hide()
 		// operations to prevent the jarring behavior of controls going away
 		// while interacting with the UI.
-		findViewById(R.id.dummy_button).setOnTouchListener(
+		findViewById(R.id.btn_ok).setOnTouchListener(
 				mDelayHideTouchListener);
 	}
 
@@ -176,12 +172,13 @@ public class FullscreenActivity extends SherlockActivity {
 	 */
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	private void setupActionBar() {
+		
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			// Show the Up button in the action bar.
+			getSupportActionBar().hide();
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		}
 	}
-
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -195,8 +192,7 @@ public class FullscreenActivity extends SherlockActivity {
 			//
 			// TODO: If Settings has multiple levels, Up should navigate up
 			// that hierarchy.
-			//NavUtils.navigateUpFromSameTask(this);
-			finish();
+			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

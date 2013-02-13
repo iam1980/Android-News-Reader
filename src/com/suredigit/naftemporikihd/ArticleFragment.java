@@ -35,7 +35,7 @@ public final class ArticleFragment extends Fragment {
 	private String mCategoryTitle;
 	private ImageView ivPhoto;
 
-	private final ImageDownloader imageDownloader = new ImageDownloader();
+	//private ImageDownloader imageDownloader = new ImageDownloader();
 	private TextView tvContent;	
 
 	public static ArticleFragment newInstance(Article article,String category) {
@@ -89,13 +89,16 @@ public final class ArticleFragment extends Fragment {
 		//
 
 		if(!(mArticle.getImgUrl() == null)){
-			imageDownloader.download(mArticle.getImgUrl(), (ImageView) ivPhoto);
+			ArticlesViewActivity.imageDownloader.download(mArticle.getImgUrl(), (ImageView) ivPhoto);
 			ivPhoto.setOnClickListener(new View.OnClickListener() {
 				//@Override
 				public void onClick(View v) {
 					Log.v(TAG, " click"); 
 
-					if (ivPhoto.getDrawable() instanceof BitmapDrawable){
+					if ((ivPhoto.getDrawable() instanceof BitmapDrawable) &&
+							(((BitmapDrawable)ivPhoto.getDrawable()).getBitmap() != null)
+							){
+						//if (((BitmapDrawable)ivPhoto.getDrawable()).getBitmap() == null) System.out.println("HELLO");
 //						Bitmap bitmap = ((BitmapDrawable)ivPhoto.getDrawable()).getBitmap();
 //						System.out.println(bitmap.getRowBytes());
 //
@@ -132,7 +135,7 @@ public final class ArticleFragment extends Fragment {
                             e.printStackTrace();
                         }						
 						
-						Intent intent = new Intent(getActivity(), FullscreenActivity.class);
+						Intent intent = new Intent(getActivity(), FullscreenPhotoViewerActivity.class);
 						intent.putExtra("title", mArticle.getTitle());
 						startActivity(intent);
 					}

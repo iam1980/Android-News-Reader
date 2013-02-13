@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * A local cache of downloaded images is maintained internally to improve performance.
  */
 public class ImageDownloader {
-    private static final String LOG_TAG = "ImageDownloader";
+    private static final String TAG = "ImageDownloader";
 
     public enum Mode { NO_ASYNC_TASK, NO_DOWNLOADED_DRAWABLE, CORRECT }
     private Mode mode = Mode.CORRECT;
@@ -176,13 +176,13 @@ public class ImageDownloader {
             }
         } catch (IOException e) {
             getRequest.abort();
-            Log.w(LOG_TAG, "I/O error while retrieving bitmap from " + url, e);
+            Log.w(TAG, "I/O error while retrieving bitmap from " + url, e);
         } catch (IllegalStateException e) {
             getRequest.abort();
-            Log.w(LOG_TAG, "Incorrect URL: " + url);
+            Log.w(TAG, "Incorrect URL: " + url);
         } catch (Exception e) {
             getRequest.abort();
-            Log.w(LOG_TAG, "Error while retrieving bitmap from " + url, e);
+            Log.w(TAG, "Error while retrieving bitmap from " + url, e);
         } finally {
             if ((client instanceof AndroidHttpClient)) {
                 ((AndroidHttpClient) client).close();
@@ -296,7 +296,7 @@ public class ImageDownloader {
      * Garbage Collector.
      */
     
-    private static final int HARD_CACHE_CAPACITY = 10;
+    private static final int HARD_CACHE_CAPACITY = 30;
     private static final int DELAY_BEFORE_PURGE = 10 * 1000; // in milliseconds
 
     // Hard cache, with a fixed maximum capacity and a life duration
@@ -375,6 +375,7 @@ public class ImageDownloader {
      * efficiency reasons, the cache will automatically be cleared after a certain inactivity delay.
      */
     public void clearCache() {
+    	Log.e(TAG,"CLEARING CACHE");
         sHardBitmapCache.clear();
         sSoftBitmapCache.clear();
     }

@@ -15,5 +15,25 @@
     <string name="title_activity_fullscreen">FullscreenActivity</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_about">About</string>
+    <string name="title_activity_about_fullscreen">AboutFullscreenActivity</string>
+    <string name="about_html">
+<![CDATA[
+<p>(c) 2013 Ηρακλής Μαθιόπουλος. </p> 
+<p>Αναφορές προβλημάτων, feedback : <b><a href="mailto:info@suredigit.com">info@suredigit.com</a></b></p>
+<p>Τα λογότυπα "naftemporiki.gr" και "N" ανήκουν στην H ΝΑΥΤΕΜΠΟΡΙΚΗ - Π. ΑΘΑΝΑΣΙΑΔΗΣ & ΣΙΑ Α.Ε. Η πηγή προέλευσης των περιεχομένων είναι η ΝΑΥΤΕΜΠΟΡΙΚH</p>
+<p></p>
+<p></p>
+<p><b>Open source modules used:</b></p>
+
+<p>ActionBarSherlock - http://actionbarsherlock.com - (c) 2012 Jake Wharton - Licensed under the Apache License, Version 2.0</p>
+<p>ViewPagerIndicator - http://viewpagerindicator.com - (c) 2012 Jake Wharton - Licensed under the Apache License, Version 2.0</p>
+<p>Android Horizontal ListView - https://github.com/dinocore1/Android-Horizontal-ListView - (c) 2011 Paul Soucy - Licensed under the The MIT License</p>
+
+<h4>Show your support for this free app. Rate it on the Google Play Store</h4>
+
+
+]]>
+    </string>
+    <string name="title_activity_fullscreen_photo_viewer">FullscreenPhotoViewerActivity</string>
 
 </resources>

@@ -57,7 +57,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_fullscreen"
             android:parentActivityName="com.suredigit.naftemporikihd.ArticlesViewActivity"
-            android:theme="@style/Theme.Sherlock" >
+            android:theme="@style/FullscreenTheme" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.suredigit.naftemporikihd.ArticlesViewActivity" />
@@ -65,12 +65,31 @@
         <activity
             android:name="com.suredigit.naftemporikihd.AboutActivity"
             android:label="@string/title_activity_about"
-            android:parentActivityName="com.suredigit.naftemporikihd.MainActivity" 
+            android:parentActivityName="com.suredigit.naftemporikihd.MainActivity"
             android:theme="@style/Theme.Sherlock" >
-            
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.suredigit.naftemporikihd.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.suredigit.naftemporikihd.AboutFullscreenActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_about_fullscreen"
+            android:parentActivityName="com.suredigit.naftemporikihd.MainActivity"
+            android:theme="@style/FullscreenTheme" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.suredigit.naftemporikihd.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.suredigit.naftemporikihd.FullscreenPhotoViewerActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_fullscreen_photo_viewer"
+            android:parentActivityName="com.suredigit.naftemporikihd.ArticlesViewActivity"
+            android:theme="@style/FullscreenTheme" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.suredigit.naftemporikihd.ArticlesViewActivity" />
         </activity>
     </application>
 

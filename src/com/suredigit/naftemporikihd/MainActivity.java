@@ -63,7 +63,7 @@ public class MainActivity extends SherlockActivity  {
 
 	private LinearLayout myLinList;
 
-	private final ImageDownloader imageDownloader = new ImageDownloader();
+	public static final ImageDownloader imageDownloader = new ImageDownloader();
 
 	ProgressDialog mProgressDialog;
 
@@ -199,6 +199,8 @@ public class MainActivity extends SherlockActivity  {
 	protected void onCreate(Bundle savedInstanceState) {
 
 		setTheme(R.style.Theme_Sherlock);
+		//setTheme(R.style.MyTheme);
+		
 		super.onCreate(savedInstanceState);
 		//getSupportActionBar().setIcon(R.drawable.ic_naftemporiki);
 		//getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -215,6 +217,13 @@ public class MainActivity extends SherlockActivity  {
 		cl = new ChangeLog(this);
 		if (cl.firstRun())
 			cl.getLogDialog().show();
+		
+		final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+		final int cacheSize = maxMemory / 8;
+		Log.i(TAG, "Max memory: "+maxMemory +", cachesize:" +cacheSize);
+		
+		//int memClass = ( ( ActivityManager )context.getSystemService( Context.ACTIVITY_SERVICE ) ).getMemoryClass();
+		//int cacheSize = 1024 * 1024 * memClass / 8;
 	}
 
 	private void refreshChannels(){
@@ -410,7 +419,7 @@ public class MainActivity extends SherlockActivity  {
 			builder.setTitle(R.string.app_name);
 			AlertDialog alert = builder.create();
 			//alert.show();
-			Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+			Intent intent = new Intent(MainActivity.this, AboutFullscreenActivity.class);
 			startActivity(intent);
 			
 			return true;		
