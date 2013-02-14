@@ -11,9 +11,11 @@ import com.suredigit.naftemporikihd.util.SystemUiHider;
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -50,6 +52,8 @@ public class FullscreenPhotoViewerActivity extends SherlockActivity {
 	 */
 	private static final int HIDER_FLAGS = SystemUiHider.FLAG_HIDE_NAVIGATION;
 
+	private static final String TAG = "FULSCREENPHOTO";
+
 	/**
 	 * The instance of the {@link SystemUiHider} for this activity.
 	 */
@@ -57,16 +61,18 @@ public class FullscreenPhotoViewerActivity extends SherlockActivity {
 
 	private String mTitle;
 
+	private ImageView contentView;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_fullscreen_photo_viewer);
 		setupActionBar();
-		
+
 		final View controlsView = findViewById(R.id.fullscreen_content_controls);
-		final ImageView contentView = (ImageView)findViewById(R.id.fullscreen_content);
-		
+		contentView = (ImageView)findViewById(R.id.fullscreen_content);
+
 		Bundle b = getIntent().getExtras();
 		mTitle = b.getString("title");
 
@@ -91,55 +97,55 @@ public class FullscreenPhotoViewerActivity extends SherlockActivity {
 				HIDER_FLAGS);
 		mSystemUiHider.setup();
 		mSystemUiHider
-				.setOnVisibilityChangeListener(new SystemUiHider.OnVisibilityChangeListener() {
-					// Cached values.
-					int mControlsHeight;
-					int mShortAnimTime;
+		.setOnVisibilityChangeListener(new SystemUiHider.OnVisibilityChangeListener() {
+			// Cached values.
+			int mControlsHeight;
+			int mShortAnimTime;
 
-					@Override
-					@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-					public void onVisibilityChange(boolean visible) {
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-							// If the ViewPropertyAnimator API is available
-							// (Honeycomb MR2 and later), use it to animate the
-							// in-layout UI controls at the bottom of the
-							// screen.
-							if (mControlsHeight == 0) {
-								mControlsHeight = controlsView.getHeight();
-							}
-							if (mShortAnimTime == 0) {
-								mShortAnimTime = getResources().getInteger(
-										android.R.integer.config_shortAnimTime);
-							}
-							controlsView
-									.animate()
-									.translationY(visible ? 0 : mControlsHeight)
-									.setDuration(mShortAnimTime);
-						} else {
-							// If the ViewPropertyAnimator APIs aren't
-							// available, simply show or hide the in-layout UI
-							// controls.
-							controlsView.setVisibility(visible ? View.VISIBLE
-									: View.GONE);
-						}
-
-						if (visible && AUTO_HIDE) {
-							// Schedule a hide().
-							delayedHide(AUTO_HIDE_DELAY_MILLIS);
-						}
+			@Override
+			@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+			public void onVisibilityChange(boolean visible) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+					// If the ViewPropertyAnimator API is available
+					// (Honeycomb MR2 and later), use it to animate the
+					// in-layout UI controls at the bottom of the
+					// screen.
+					if (mControlsHeight == 0) {
+						mControlsHeight = controlsView.getHeight();
 					}
-				});
+					if (mShortAnimTime == 0) {
+						mShortAnimTime = getResources().getInteger(
+								android.R.integer.config_shortAnimTime);
+					}
+					controlsView
+					.animate()
+					.translationY(visible ? 0 : mControlsHeight)
+					.setDuration(mShortAnimTime);
+				} else {
+					// If the ViewPropertyAnimator APIs aren't
+					// available, simply show or hide the in-layout UI
+					// controls.
+					controlsView.setVisibility(visible ? View.VISIBLE
+							: View.GONE);
+				}
+
+				if (visible && AUTO_HIDE) {
+					// Schedule a hide().
+					delayedHide(AUTO_HIDE_DELAY_MILLIS);
+				}
+			}
+		});
 
 		// Set up the user interaction to manually show or hide the system UI.
 		contentView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				finish();
-//				if (TOGGLE_ON_CLICK) {
-//					mSystemUiHider.toggle();
-//				} else {
-//					mSystemUiHider.show();
-//				}
+				//				if (TOGGLE_ON_CLICK) {
+				//					mSystemUiHider.toggle();
+				//				} else {
+				//					mSystemUiHider.show();
+				//				}
 			}
 		});
 
@@ -148,14 +154,14 @@ public class FullscreenPhotoViewerActivity extends SherlockActivity {
 		// while interacting with the UI.
 		findViewById(R.id.dummy_button).setOnTouchListener(
 				mDelayHideTouchListener);
-		
+
 		Button closeBtn = (Button) findViewById(R.id.dummy_button);
 		closeBtn.setOnClickListener(new View.OnClickListener() {
-			   //@Override
-			   public void onClick(View v) {
-			      finish();       
-			   }        
-			});
+			//@Override
+			public void onClick(View v) {
+				finish();       
+			}        
+		});
 	}
 
 	@Override
@@ -231,4 +237,30 @@ public class FullscreenPhotoViewerActivity extends SherlockActivity {
 		mHideHandler.removeCallbacks(mHideRunnable);
 		mHideHandler.postDelayed(mHideRunnable, delayMillis);
 	}
+
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+			// Show the Up button in the action bar.
+			//FOR PRE 3.0 SDK
+			if(contentView.getDrawable() instanceof BitmapDrawable){
+				if (!((BitmapDrawable)contentView.getDrawable() == null)){
+					Bitmap bitmap = ((BitmapDrawable)contentView.getDrawable()).getBitmap();
+					if (bitmap != null){
+						bitmap.recycle();
+						bitmap = null;
+					}
+					contentView = null;}
+			}
+		}
+
+
+
+
+
+	}
+
+
 }

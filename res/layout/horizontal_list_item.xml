@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:background="#696969"
+        android:background="#3f3f3f"
         android:maxHeight="150dp"
         android:maxWidth="150dp"
         android:minHeight="150dp"

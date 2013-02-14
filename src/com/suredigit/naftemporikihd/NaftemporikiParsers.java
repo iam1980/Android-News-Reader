@@ -27,7 +27,11 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import android.util.Log;
+
 public class NaftemporikiParsers {
+
+	private static final String TAG = "Naft Parsers";
 
 	public static Document parseXML(String xml) throws IOException, ParserConfigurationException, SAXException{
 		Document doc = null;
@@ -90,8 +94,32 @@ public class NaftemporikiParsers {
 						int xF = getParamValue(imgUrl,"width");
 						int yF = getParamValue(imgUrl,"height");
 						
-						imgUrl = imgUrl.replace("&width="+xF,"&width=768");
-						imgUrl = imgUrl.replace("&height="+yF,"&height=450");
+						int width = 768;
+						int height = 450;
+
+						switch (MainActivity.MEMSIZE) {
+						case LOW:
+							width = 432;
+							height = 240;
+							break;
+						case MED:
+							width = 454;
+							height = 266;
+							break;
+						case HIGH:
+							width = 575;
+							height = 336;
+							break;
+						case ULTRA:
+							width = 768;
+							height = 450;
+							break;			
+						}
+						
+						
+						
+						imgUrl = imgUrl.replace("&width="+xF,"&width="+width);
+						imgUrl = imgUrl.replace("&height="+yF,"&height="+height);
 						
 				
 						//System.out.println(imgUrl);

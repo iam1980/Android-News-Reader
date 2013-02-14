@@ -6,6 +6,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.suredigit.naftemporikihd.MainActivity.MemSize;
 import com.viewpagerindicator.PageIndicator;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
@@ -16,8 +17,11 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
 public class ArticlesViewActivity extends SherlockFragmentActivity implements ActionBar.OnNavigationListener{
@@ -52,7 +56,23 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 		//getSupportActionBar().setIcon(R.drawable.ic_naftemporiki);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-		Log.e(TAG,"CLEARING CACHE");
+		
+		
+		switch (MainActivity.MEMSIZE) {
+		case LOW:
+			imageDownloader.setMemSize(MemSize.LOW);
+			break;
+		case MED:
+			imageDownloader.setMemSize(MemSize.MED);
+			break;
+		case HIGH:
+			imageDownloader.setMemSize(MemSize.HIGH);
+			break;
+		case ULTRA:
+			imageDownloader.setMemSize(MemSize.HIGH);
+			break;	
+		}
+		
 		imageDownloader.clearCache();
 		
 
@@ -93,11 +113,7 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 		Bundle b = getIntent().getExtras();
 		RssChannel theChan = b.getParcelable("parcel");
 		
-		System.out.println("INDEX O FFFFF"+mRssChannels.indexOf(theChan));
-		
 		int position = b.getInt("position");
-		System.out.println(theChan.getTitle());
-		System.out.println(theChan.getArticles().get(position));
 		mChannel = theChan;
 		mCategoryTitle = theChan.getTitle();
 
@@ -133,6 +149,19 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 		public Fragment getItem(int position) {
 			return ArticleFragment.newInstance(mChannel.getArticles().get(position),mCategoryTitle);
 		}
+		
+		@Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            // TODO Auto-generated method stub
+
+                FragmentManager manager = ((Fragment) object).getFragmentManager();
+                FragmentTransaction trans = manager.beginTransaction();
+                trans.remove((Fragment) object);
+                trans.commit();
+
+            super.destroyItem(container, position, object);
+        }
+		
 	}	
 
 	@Override
@@ -257,14 +286,12 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 	@Override
 	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
 		if (mNaviCounter != 0){
-			System.out.println("Selected: " + mRssTitles[itemPosition]);
 			finish();
 			overridePendingTransition(0, 0);
 			Intent intent = new Intent(ArticlesViewActivity.this, ArticlesViewActivity.class);
 			intent.putExtra("parcel", mRssChannels.get(MainActivity.getRealChanPositionByTitle(mRssTitles[itemPosition])));
 			intent.putExtra("position", 0);
 			intent.putExtra("chanPos", MainActivity.getPositionInEnabledChannelsByTitle(mRssTitles[itemPosition]));
-			System.out.println("OKOKO"+MainActivity.getPositionInEnabledChannelsByTitle(mRssTitles[itemPosition]));
 			startActivity(intent);
 			return false;
 		}

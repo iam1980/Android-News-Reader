@@ -17,9 +17,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.w3c.dom.Document;
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -27,6 +27,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -43,6 +44,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -71,6 +74,9 @@ public class MainActivity extends SherlockActivity  {
 	public static int pFontSize;
 
 	private ChangeLog cl;
+	
+	public static enum MemSize { LOW, MED, HIGH , ULTRA };
+	public static MemSize MEMSIZE = MemSize.HIGH;
 
 	public static void loadPreferences() {	
 		SharedPreferences preferences = Singleton.getInstance().prefs;
@@ -128,10 +134,11 @@ public class MainActivity extends SherlockActivity  {
 	public static ArrayList<RssChannel> loadChannelsFromFile(){
 
 		ArrayList<RssChannel> defaultRssChannels = new ArrayList<RssChannel>();
-		defaultRssChannels.add(new RssChannel("Οικονομία & Αγορές",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=1"));
+
 		defaultRssChannels.add(new RssChannel("Πολιτική",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=2"));		
 		defaultRssChannels.add(new RssChannel("Κοινωνία",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=3"));		
 		defaultRssChannels.add(new RssChannel("Κόσμος",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=4"));
+		defaultRssChannels.add(new RssChannel("Οικονομία & Αγορές",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=1"));
 		defaultRssChannels.add(new RssChannel("Αθλητικά",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=5"));
 		defaultRssChannels.add(new RssChannel("Πολιτισμός",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=6"));
 		defaultRssChannels.add(new RssChannel("Περιβάλλον",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=8"));
@@ -194,16 +201,30 @@ public class MainActivity extends SherlockActivity  {
 		Window window = this.getWindow();
 		window.setFormat(PixelFormat.RGBA_8888);
 	}
+	
+	@Override
+	protected void onResume(){
+		super.onResume();
+		imageDownloader.setMemSize(MemSize.ULTRA);
+		
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-
 		setTheme(R.style.Theme_Sherlock);
-		//setTheme(R.style.MyTheme);
-		
 		super.onCreate(savedInstanceState);
-		//getSupportActionBar().setIcon(R.drawable.ic_naftemporiki);
-		//getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+		final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+		final int cacheSize = maxMemory / 8;
+		if (maxMemory < 21000) MEMSIZE = MemSize.LOW;
+		if (maxMemory > 21001) MEMSIZE = MemSize.MED;
+		if (maxMemory > 30000) MEMSIZE = MemSize.HIGH;
+		if (maxMemory > 42000) MEMSIZE = MemSize.ULTRA;
+		
+		imageDownloader.setMemSize(MemSize.ULTRA);
+		
+		
+		
 		setContentView(R.layout.activity_main);
 		loadPreferences();
 		mRssChannels = loadChannelsFromFile();
@@ -218,10 +239,7 @@ public class MainActivity extends SherlockActivity  {
 		if (cl.firstRun())
 			cl.getLogDialog().show();
 		
-		final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-		final int cacheSize = maxMemory / 8;
-		Log.i(TAG, "Max memory: "+maxMemory +", cachesize:" +cacheSize);
-		
+
 		//int memClass = ( ( ActivityManager )context.getSystemService( Context.ACTIVITY_SERVICE ) ).getMemoryClass();
 		//int cacheSize = 1024 * 1024 * memClass / 8;
 	}
@@ -244,19 +262,24 @@ public class MainActivity extends SherlockActivity  {
 				task.execute(theChan.getUrl());
 				//task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,theChan.getUrl());
 				mRssHtmlDownloaderTasks.add(task);
-				Log.i(TAG,"task d/l linkg" + theChan.getUrl());
 			}
 		}
 		updateLastFetch();	
 	}
 	
 	private void parseChannels(){
+		for (RssHtmlDownloaderTask theTask: mRssHtmlDownloaderTasks){
+			theTask = null;
+		}
+		mRssHtmlDownloaderTasks = null;
+		
 		//*** - PARSE XML START		
 		for (RssChannel theChan : mRssChannels){
 			if(!(theChan.getHtml() == null)){
 				try {
 					Document doc = NaftemporikiParsers.parseXML(theChan.getHtml());
 					theChan.setArticles(NaftemporikiParsers.populateArticles(doc));
+					theChan.setHtml(null);
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -309,6 +332,7 @@ public class MainActivity extends SherlockActivity  {
 					public void onItemClick(AdapterView<?> parent, View v,
 							int position, long id) {
 						// TODO Auto-generated method stub
+
 						v.playSoundEffect(SoundEffectConstants.CLICK);
 						//Article clickedArticle = (Article)parent.getItemAtPosition(position);
 						Intent intent = new Intent(MainActivity.this, ArticlesViewActivity.class);
@@ -333,7 +357,6 @@ public class MainActivity extends SherlockActivity  {
 			if(v instanceof HorizontalListView){	
 				ArticleAdapter theAdapter = (ArticleAdapter)((HorizontalListView) v).getAdapter();
 				theAdapter.notifyDataSetChanged();
-				System.out.println("FOUND A LISTVIEW! at"+ i);
 			}
 		}
 	}
@@ -374,7 +397,6 @@ public class MainActivity extends SherlockActivity  {
 				return retval;  
 			} else {
 				View retval = LayoutInflater.from(parent.getContext()).inflate(R.layout.horizontal_list_dummy, null); 
-				System.out.println("FOUND DUMMY!!");
 				return retval;
 			}
 		}  		
@@ -387,7 +409,6 @@ public class MainActivity extends SherlockActivity  {
 
 		switch (item.getItemId()) {
 		case R.id.menu_rss:
-			System.out.println("RSS");
 
 			Intent myIntent = new Intent(MainActivity.this, SelectRssChannelsActivity.class);
 			MainActivity.this.startActivity(myIntent);
@@ -398,31 +419,25 @@ public class MainActivity extends SherlockActivity  {
 
 			return true;			
 		case R.id.menu_about:
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage("έκδοση: "+VERSION+"\n\n" +
-					"(c) Ηρακλής Μαθιόπουλος.\n\nΑναφορές προβλημάτων: info@suredigit.com\n\n"+
-					"Τα λογότυπα \"naftemporiki.gr\" και \"N\" ανήκουν στην H ΝΑΥΤΕΜΠΟΡΙΚΗ - Π. ΑΘΑΝΑΣΙΑΔΗΣ & ΣΙΑ Α.Ε. Η πηγή προέλευσης των περιεχομένων είναι η ΝΑΥΤΕΜΠΟΡΙΚΙ\n")
-					.setCancelable(false)
-					.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							//do things
-						}
-					});
-
-			builder.setNeutralButton("Changelog",
-					new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					cl.getFullLogDialog().show();
-				}
-			});
-
-			builder.setTitle(R.string.app_name);
-			AlertDialog alert = builder.create();
-			//alert.show();
 			Intent intent = new Intent(MainActivity.this, AboutFullscreenActivity.class);
 			startActivity(intent);
 			
-			return true;		
+			return true;
+			
+		case R.id.menu_changelog:
+			cl.getFullLogDialog().show();
+			return true;
+			
+		case R.id.menu_rate:
+			System.out.println(MainActivity.this.getPackageName());
+			Uri uri = Uri.parse("market://details?id=" + MainActivity.this.getPackageName());
+			Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+			try {
+			  startActivity(goToMarket);
+			} catch (ActivityNotFoundException e) {
+			  Toast.makeText(MainActivity.this, "Couldn't launch the market", Toast.LENGTH_LONG).show();
+			}
+			return true;
 		}
 
 		return super.onOptionsItemSelected(item);
@@ -472,11 +487,9 @@ public class MainActivity extends SherlockActivity  {
 
 			if (theHtml != null) {
 				channel.setHtml(theHtml);
-				System.out.println("LOADED HTML COINTENT");
 				int myProg = mProgressDialog.getProgress();
 				myProg++;
 				mProgressDialog.setProgress(myProg);
-				System.out.println(myProg);
 				//buildUI();
 			}
 
@@ -488,7 +501,6 @@ public class MainActivity extends SherlockActivity  {
 			}
 			if (unfinishedTasks == 1){
 				//We are all done. 1 Because its the current one that hasnt finished post execute
-				System.out.println("ALLLLLLLLLLLLLLL DONE");
 				parseChannels();
 				buildUI();
 				updateThumbnails();

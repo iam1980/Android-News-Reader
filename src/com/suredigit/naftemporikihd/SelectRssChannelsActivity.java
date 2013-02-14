@@ -141,7 +141,6 @@ public class SelectRssChannelsActivity extends SherlockListActivity
 		// TODO Auto-generated method stub
 		super.onListItemClick(l, v, position, id);
 		RssChannel chan =(RssChannel)getListView().getItemAtPosition(position);
-		System.out.println("Title:"+chan.getTitle());
 		if(chan.isEnabled())
 			chan.setEnabled(false);
 		else chan.setEnabled(true);
@@ -204,7 +203,6 @@ public class SelectRssChannelsActivity extends SherlockListActivity
 			//
 			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
 			//
-			System.out.println("HOME CLICKED");
 			//finish();
 			
 			if(mChangesMade){

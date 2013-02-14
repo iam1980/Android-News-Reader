@@ -14,7 +14,6 @@ public class Singleton extends Application {
 	public static SharedPreferences.Editor editor = null;
 	public Singleton() {
 		super();
-		Log.e(TAG, "Singleton created.");
 		m_Instance = this;
 		//	
 	}

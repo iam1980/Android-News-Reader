@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Html;
@@ -35,7 +36,7 @@ public final class ArticleFragment extends Fragment {
 	private String mCategoryTitle;
 	private ImageView ivPhoto;
 
-	//private ImageDownloader imageDownloader = new ImageDownloader();
+	private ImageDownloader imageDownloader = new ImageDownloader();
 	private TextView tvContent;	
 
 	public static ArticleFragment newInstance(Article article,String category) {
@@ -52,7 +53,6 @@ public final class ArticleFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		System.out.println("GOTE HER");
 		if ((savedInstanceState != null) && savedInstanceState.containsKey(KEY_CONTENT)) {
 			mArticle = savedInstanceState.getParcelable(KEY_CONTENT);
 		}
@@ -99,42 +99,41 @@ public final class ArticleFragment extends Fragment {
 							(((BitmapDrawable)ivPhoto.getDrawable()).getBitmap() != null)
 							){
 						//if (((BitmapDrawable)ivPhoto.getDrawable()).getBitmap() == null) System.out.println("HELLO");
-//						Bitmap bitmap = ((BitmapDrawable)ivPhoto.getDrawable()).getBitmap();
-//						System.out.println(bitmap.getRowBytes());
-//
-//
-//						FileOutputStream fos;
-//						try {
-//							fos = getActivity().openFileOutput("TMPIMG", Context.MODE_PRIVATE);
-//							bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-//							fos.close();
-//
-//						} catch (FileNotFoundException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						} catch (IOException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
+						//						Bitmap bitmap = ((BitmapDrawable)ivPhoto.getDrawable()).getBitmap();
+						//						System.out.println(bitmap.getRowBytes());
+						//
+						//
+						//						FileOutputStream fos;
+						//						try {
+						//							fos = getActivity().openFileOutput("TMPIMG", Context.MODE_PRIVATE);
+						//							bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+						//							fos.close();
+						//
+						//						} catch (FileNotFoundException e) {
+						//							// TODO Auto-generated catch block
+						//							e.printStackTrace();
+						//						} catch (IOException e) {
+						//							// TODO Auto-generated catch block
+						//							e.printStackTrace();
+						//						}
 						File cacheDir = getActivity().getBaseContext().getCacheDir();
 						File f = new File(cacheDir, "pic");
 
-                        try {
-                            FileOutputStream out = new FileOutputStream(f);
-                            Bitmap bitmap = ((BitmapDrawable)ivPhoto.getDrawable()).getBitmap();
-                            bitmap.compress(
-                                    Bitmap.CompressFormat.JPEG,
-                                    100, out);
-                            out.flush();
-                            out.close();
-                            System.out.println("FILE SAVED");
+						try {
+							FileOutputStream out = new FileOutputStream(f);
+							Bitmap bitmap = ((BitmapDrawable)ivPhoto.getDrawable()).getBitmap();
+							bitmap.compress(
+									Bitmap.CompressFormat.JPEG,
+									100, out);
+							out.flush();
+							out.close();
 
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }						
-						
+						} catch (FileNotFoundException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}						
+
 						Intent intent = new Intent(getActivity(), FullscreenPhotoViewerActivity.class);
 						intent.putExtra("title", mArticle.getTitle());
 						startActivity(intent);
@@ -171,7 +170,6 @@ public final class ArticleFragment extends Fragment {
 	}
 
 	public void toggleTextSize(){
-		System.out.println("Hello");
 		//float sizePix = tvContent.getTextSize();
 		//float sizeSp = pixelsToSp(getActivity(),sizePix);
 		//System.out.println(sizeSp);
@@ -190,7 +188,6 @@ public final class ArticleFragment extends Fragment {
 		super.onSaveInstanceState(outState);
 		//outState.putString(KEY_CONTENT, mContent);
 		outState.putParcelable("KEY_CONTENT", mArticle);
-		System.out.println("SAVING");
 	}
 
 	public static float pixelsToSp(Context context, Float px) {
@@ -199,5 +196,24 @@ public final class ArticleFragment extends Fragment {
 	}
 
 
+
+	@Override
+	public void onDestroyView() {
+		// TODO Auto-generated method stub
+		super.onDestroyView();
+		//FOR PRE 3.0 SDK
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+			if(ivPhoto.getDrawable() instanceof BitmapDrawable){
+				if (!((BitmapDrawable)ivPhoto.getDrawable() == null)){
+					Bitmap bitmap = ((BitmapDrawable)ivPhoto.getDrawable()).getBitmap();
+					if (bitmap != null){
+						//bitmap.recycle();
+						bitmap = null;
+					}
+					ivPhoto = null;}
+			}
+		}
+
+	}
 
 }

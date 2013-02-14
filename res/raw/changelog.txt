@@ -21,8 +21,9 @@
   <body>
 $ 1.0.1
   % Version 1.0.1
-  _ 2013-02-12
+  _ 2013-02-14
     * First public release
+    * Please report any feedback/suggestions and/or bug reports to info@suredigit.com
 $ END_OF_CHANGE_LOG
   </body>
 </html>
