@@ -17,6 +17,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.w3c.dom.Document;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
@@ -29,6 +30,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -49,6 +51,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.google.analytics.tracking.android.EasyTracker;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -74,7 +77,7 @@ public class MainActivity extends SherlockActivity  {
 	public static int pFontSize;
 
 	private ChangeLog cl;
-	
+
 	public static enum MemSize { LOW, MED, HIGH , ULTRA };
 	public static MemSize MEMSIZE = MemSize.HIGH;
 
@@ -143,8 +146,8 @@ public class MainActivity extends SherlockActivity  {
 		defaultRssChannels.add(new RssChannel("Πολιτισμός",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=6"));
 		defaultRssChannels.add(new RssChannel("Περιβάλλον",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=8"));
 		defaultRssChannels.add(new RssChannel("Τεχνολογία - Επιστήμη",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=7"));
-		Gson gson = new Gson();
-		String jsonDef = gson.toJson(defaultRssChannels); 
+		//		Gson gson = new Gson();
+		//		String jsonDef = gson.toJson(defaultRssChannels); 
 
 		FileInputStream fis;
 		boolean flag = false;
@@ -159,7 +162,9 @@ public class MainActivity extends SherlockActivity  {
 				sb.append(line);
 			}
 			fis.close();
-			flag = true;
+			if((sb.toString().equalsIgnoreCase("null")) || (sb == null)){
+				flag = false;
+			} else flag = true;
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -170,9 +175,10 @@ public class MainActivity extends SherlockActivity  {
 
 		Type listType = new TypeToken<ArrayList<RssChannel>>() {}.getType();
 		if (flag) {
+			Gson gson = new Gson();
 			return gson.fromJson(sb.toString(),listType);
 		} else {
-			return gson.fromJson(jsonDef,listType);
+			return defaultRssChannels;
 		}
 	}
 
@@ -201,13 +207,25 @@ public class MainActivity extends SherlockActivity  {
 		Window window = this.getWindow();
 		window.setFormat(PixelFormat.RGBA_8888);
 	}
-	
+
 	@Override
 	protected void onResume(){
 		super.onResume();
 		imageDownloader.setMemSize(MemSize.ULTRA);
-		
+
 	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		EasyTracker.getInstance().activityStart(this); // Add this method.
+	}	
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		EasyTracker.getInstance().activityStop(this); // Add this method.
+	}	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -220,30 +238,49 @@ public class MainActivity extends SherlockActivity  {
 		if (maxMemory > 21001) MEMSIZE = MemSize.MED;
 		if (maxMemory > 30000) MEMSIZE = MemSize.HIGH;
 		if (maxMemory > 42000) MEMSIZE = MemSize.ULTRA;
-		
+
 		imageDownloader.setMemSize(MemSize.ULTRA);
-		
-		
-		
 		setContentView(R.layout.activity_main);
+		myLinList =(LinearLayout) findViewById(R.id.LinearLayout1);
+
 		loadPreferences();
-		mRssChannels = loadChannelsFromFile();
-		if (getLastFetch() + SECONDSTOREFRESH < (System.currentTimeMillis()/1000)){
-			refreshChannels();
-		} else {
-			buildUI();
-			updateThumbnails();
-		}
+
+		//mRssChannels = loadChannelsFromFile();
+		new LoadChannelsTask().execute();
 
 		cl = new ChangeLog(this);
 		if (cl.firstRun())
 			cl.getLogDialog().show();
-		
+
 
 		//int memClass = ( ( ActivityManager )context.getSystemService( Context.ACTIVITY_SERVICE ) ).getMemoryClass();
 		//int cacheSize = 1024 * 1024 * memClass / 8;
 	}
 
+	class LoadChannelsTask extends AsyncTask<Void, Void, ArrayList<RssChannel>> {
+		@Override
+		protected ArrayList<RssChannel> doInBackground(Void... params) {
+			// TODO Auto-generated method stub
+			return loadChannelsFromFile();
+		}
+		@Override
+		protected void onPostExecute(ArrayList<RssChannel> result){
+			mRssChannels = result;
+			refreshOrBuildUI();
+		}
+	}
+
+
+	public void refreshOrBuildUI(){
+		if (getLastFetch() + SECONDSTOREFRESH < (System.currentTimeMillis()/1000)){
+			refreshChannels();
+		} else {
+			buildUI();
+			updateThumbnails();
+		}		
+	}
+
+	@SuppressLint("NewApi")
 	private void refreshChannels(){
 		mProgressDialog = new ProgressDialog(MainActivity.this);
 		mProgressDialog.setMessage("Μεταφώρτωση Ειδήσεων");
@@ -252,27 +289,30 @@ public class MainActivity extends SherlockActivity  {
 		mProgressDialog.setMax(getEnabledChanCount());
 		mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 
-		
-		
+
+
 		mRssHtmlDownloaderTasks = new ArrayList<RssHtmlDownloaderTask>();
 		for (RssChannel theChan : mRssChannels){
 			if (theChan.isEnabled()){
-				theChan.getArticles().clear();
-				RssHtmlDownloaderTask task = new RssHtmlDownloaderTask(theChan);
-				task.execute(theChan.getUrl());
-				//task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,theChan.getUrl());
+				if(theChan.getArticles() != null) theChan.getArticles().clear();
+				RssHtmlDownloaderTask task = new RssHtmlDownloaderTask(theChan);	
+				if (android.os.Build.VERSION.SDK_INT>=android.os.Build.VERSION_CODES.HONEYCOMB) {
+					task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,theChan.getUrl());
+				} else {
+					task.execute(theChan.getUrl());
+				}
 				mRssHtmlDownloaderTasks.add(task);
 			}
 		}
 		updateLastFetch();	
 	}
-	
+
 	private void parseChannels(){
 		for (RssHtmlDownloaderTask theTask: mRssHtmlDownloaderTasks){
 			theTask = null;
 		}
 		mRssHtmlDownloaderTasks = null;
-		
+
 		//*** - PARSE XML START		
 		for (RssChannel theChan : mRssChannels){
 			if(!(theChan.getHtml() == null)){
@@ -297,55 +337,55 @@ public class MainActivity extends SherlockActivity  {
 	private void buildUI(){
 
 		//*** - BUILD HORIZONTALLISTVIEWS START
-		myLinList =(LinearLayout) findViewById(R.id.LinearLayout1);
 		if(((LinearLayout) myLinList).getChildCount() > 0) 
-		    ((LinearLayout) myLinList).removeAllViews(); 
-		for (RssChannel theChan : mRssChannels){
-			if ((!(theChan.getArticles() == null)) && theChan.isEnabled()){
-				final RssChannel myChan = theChan;
-				HorizontalListView hListView = new HorizontalListView(this,null);
-				ArticleAdapter myAdapter = new ArticleAdapter(this, R.layout.horizontal_list_item, theChan.getArticles());
-				hListView.setAdapter(myAdapter);
+			((LinearLayout) myLinList).removeAllViews(); 
+		if (mRssChannels != null){
+			for (RssChannel theChan : mRssChannels){
+				if ((!(theChan.getArticles() == null)) && theChan.isEnabled()){
+					final RssChannel myChan = theChan;
+					HorizontalListView hListView = new HorizontalListView(this,null);
+					ArticleAdapter myAdapter = new ArticleAdapter(this, R.layout.horizontal_list_item, theChan.getArticles());
+					hListView.setAdapter(myAdapter);
 
-				hListView.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
-				LayoutParams hLparams = hListView.getLayoutParams();
-				hLparams.height  = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 150, getResources().getDisplayMetrics());
-				hListView.setLayoutParams(hLparams);
+					hListView.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
+					LayoutParams hLparams = hListView.getLayoutParams();
+					hLparams.height  = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 150, getResources().getDisplayMetrics());
+					hListView.setLayoutParams(hLparams);
 
-				TextView channTitleTV = new TextView(this);
-				channTitleTV.setText(theChan.getTitle());
-				channTitleTV.setTextAppearance(this, android.R.style.TextAppearance_Medium);
-				channTitleTV.setTextSize(15);
-				channTitleTV.setTypeface(null,Typeface.BOLD);
-				LinearLayout.LayoutParams channTitleTVparams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-				channTitleTVparams.setMargins(6, 2, 0, 8); //substitute parameters for left, top, right, bottom
-				channTitleTV.setLayoutParams(channTitleTVparams);
+					TextView channTitleTV = new TextView(this);
+					channTitleTV.setText(theChan.getTitle());
+					channTitleTV.setTextAppearance(this, android.R.style.TextAppearance_Medium);
+					channTitleTV.setTextSize(15);
+					channTitleTV.setTypeface(null,Typeface.BOLD);
+					LinearLayout.LayoutParams channTitleTVparams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+					channTitleTVparams.setMargins(6, 2, 0, 8); //substitute parameters for left, top, right, bottom
+					channTitleTV.setLayoutParams(channTitleTVparams);
 
-				TextView spacerTV = new TextView(this);
+					TextView spacerTV = new TextView(this);
 
-				myLinList.addView(channTitleTV);
-				myLinList.addView(hListView);
-				myLinList.addView(spacerTV);
+					myLinList.addView(channTitleTV);
+					myLinList.addView(hListView);
+					myLinList.addView(spacerTV);
 
-				hListView.setOnItemClickListener(new OnItemClickListener(){
-					@Override
-					public void onItemClick(AdapterView<?> parent, View v,
-							int position, long id) {
-						// TODO Auto-generated method stub
+					hListView.setOnItemClickListener(new OnItemClickListener(){
+						@Override
+						public void onItemClick(AdapterView<?> parent, View v,
+								int position, long id) {
+							// TODO Auto-generated method stub
 
-						v.playSoundEffect(SoundEffectConstants.CLICK);
-						//Article clickedArticle = (Article)parent.getItemAtPosition(position);
-						Intent intent = new Intent(MainActivity.this, ArticlesViewActivity.class);
-						intent.putExtra("parcel", myChan);
-						intent.putExtra("position", position);
-						intent.putExtra("chanPos", getPositionInEnabledChannels(myChan));
-						startActivity(intent);
-					}}
-						);
+							v.playSoundEffect(SoundEffectConstants.CLICK);
+							//Article clickedArticle = (Article)parent.getItemAtPosition(position);
+							Intent intent = new Intent(MainActivity.this, ArticlesViewActivity.class);
+							intent.putExtra("parcel", myChan);
+							intent.putExtra("position", position);
+							intent.putExtra("chanPos", getPositionInEnabledChannels(myChan));
+							startActivity(intent);
+						}}
+							);
 
 
-			}
-		}
+				}
+			}}
 		saveChannelsToFile(mRssChannels);
 	}
 
@@ -421,21 +461,21 @@ public class MainActivity extends SherlockActivity  {
 		case R.id.menu_about:
 			Intent intent = new Intent(MainActivity.this, AboutFullscreenActivity.class);
 			startActivity(intent);
-			
+
 			return true;
-			
+
 		case R.id.menu_changelog:
 			cl.getFullLogDialog().show();
 			return true;
-			
+
 		case R.id.menu_rate:
 			System.out.println(MainActivity.this.getPackageName());
 			Uri uri = Uri.parse("market://details?id=" + MainActivity.this.getPackageName());
 			Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
 			try {
-			  startActivity(goToMarket);
+				startActivity(goToMarket);
 			} catch (ActivityNotFoundException e) {
-			  Toast.makeText(MainActivity.this, "Couldn't launch the market", Toast.LENGTH_LONG).show();
+				Toast.makeText(MainActivity.this, "Couldn't launch the market", Toast.LENGTH_LONG).show();
 			}
 			return true;
 		}
@@ -459,7 +499,7 @@ public class MainActivity extends SherlockActivity  {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			
+
 			mProgressDialog.show();
 		}		
 
@@ -505,13 +545,13 @@ public class MainActivity extends SherlockActivity  {
 				buildUI();
 				updateThumbnails();
 				//mProgressDialog.dismiss();
-				   try {
-					   mProgressDialog.dismiss();
-				        //dialog = null;
-				    } catch (Exception e) {
-				        // nothing
-				    }
-				
+				try {
+					mProgressDialog.dismiss();
+					//dialog = null;
+				} catch (Exception e) {
+					// nothing
+				}
+
 				//prefetchArticleHtml();
 
 			}			

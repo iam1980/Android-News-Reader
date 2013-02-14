@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/about_bg1"
+    android:background="@drawable/about_bg5"
     tools:context=".AboutFullscreenActivity" >
 
     <!--
@@ -64,6 +64,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="3dp"
+        android:gravity="center_horizontal"
         android:text="Medium Text"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 		
