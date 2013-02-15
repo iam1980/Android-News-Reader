@@ -380,6 +380,7 @@ public class MainActivity extends SherlockActivity  {
 							intent.putExtra("position", position);
 							intent.putExtra("chanPos", getPositionInEnabledChannels(myChan));
 							startActivity(intent);
+							overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
 						}}
 							);
 
