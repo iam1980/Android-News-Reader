@@ -19,6 +19,12 @@
     </style>
   </head>
   <body>
+$ 1.0.2
+  % Version 1.0.2
+  _ 2013-02-16
+    * Performance optimisations: Improved overall responsiveness and lowered memory usage.
+    * Small cosmetic enhancements
+    * New launcher icon
 $ 1.0.1
   % Version 1.0.1
   _ 2013-02-14
