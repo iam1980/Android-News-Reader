@@ -61,6 +61,11 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 	private OnItemLongClickListener mOnItemLongClicked;
 	private boolean mDataChanged = false;
 
+	private float mLastX;
+	private float mLastY;
+	private float mDiffX;
+	private float mDiffY;    	
+
 
 	public HorizontalListView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -137,7 +142,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 	private synchronized void reset(){
 		initView();
 		removeAllViewsInLayout();
-        requestLayout();
+		requestLayout();
 	}
 
 	@Override
@@ -300,7 +305,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 	}
 
 	protected boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-				float velocityY) {
+			float velocityY) {
 		synchronized(HorizontalListView.this){
 			mScroller.fling(mNextX, 0, (int)-velocityX, 0, 0, mMaxX, 0, 0);
 		}
@@ -313,6 +318,37 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 		mScroller.forceFinished(true);
 		return true;
 	}
+
+	@Override
+	public boolean onInterceptTouchEvent(MotionEvent ev) {
+		switch (ev.getAction()) {
+		case MotionEvent.ACTION_DOWN:
+			// reset difference values
+			mDiffX = 0;
+			mDiffY = 0;
+
+			mLastX = ev.getX();
+			mLastY = ev.getY();
+			break;
+
+		case MotionEvent.ACTION_MOVE:
+			final float curX = ev.getX();
+			final float curY = ev.getY();
+			mDiffX += Math.abs(curX - mLastX);
+			mDiffY += Math.abs(curY - mLastY);
+			mLastX = curX;
+			mLastY = curY;
+
+			// don't intercept event, when user tries to scroll horizontally
+			if (!(mDiffX > mDiffY)) {
+				//ev.setAction(MotionEvent.ACTION_UP);
+				//return super.onInterceptTouchEvent(ev);
+				return false;
+			}
+		}
+
+		return super.onInterceptTouchEvent(ev);
+	} 	
 
 	private OnGestureListener mOnGesture = new GestureDetector.SimpleOnGestureListener() {
 
@@ -333,20 +369,31 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
 			final ViewParent viewParent = getParent();
 			if (viewParent != null) {
-				if (Math.abs(distanceX) > Math.abs(distanceY))
-					viewParent.requestDisallowInterceptTouchEvent(true);
-				else viewParent.requestDisallowInterceptTouchEvent(false);
-		    }
+				CustomScrollView cs = (CustomScrollView)viewParent.getParent();
+				if (cs != null){
+					if (Math.abs(distanceX) > Math.abs(distanceY)){
+
+						//viewParent.requestDisallowInterceptTouchEvent(true);
+						viewParent.getParent().requestDisallowInterceptTouchEvent(true);
+						cs.setIsScrollable(false);
+					}
+					else {
+						viewParent.requestDisallowInterceptTouchEvent(false);
+						
+					}
+					cs.setIsScrollable(true);
+				}
+			}
 			//System.out.println("X:" + distanceX +",Y:"+ distanceY);
 			//System.out.println(getChildAt(getFirstVisiblePosition()));
-			
+
 			synchronized(HorizontalListView.this){
 				mNextX += (int)distanceX;
 			}
 			requestLayout();
 
 			return true;
-		}
+		}	
 
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent e) {
@@ -382,16 +429,16 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 		}
 
 		private boolean isEventWithinView(MotionEvent e, View child) {
-            Rect viewRect = new Rect();
-            int[] childPosition = new int[2];
-            child.getLocationOnScreen(childPosition);
-            int left = childPosition[0];
-            int right = left + child.getWidth();
-            int top = childPosition[1];
-            int bottom = top + child.getHeight();
-            viewRect.set(left, top, right, bottom);
-            return viewRect.contains((int) e.getRawX(), (int) e.getRawY());
-        }
+			Rect viewRect = new Rect();
+			int[] childPosition = new int[2];
+			child.getLocationOnScreen(childPosition);
+			int left = childPosition[0];
+			int right = left + child.getWidth();
+			int top = childPosition[1];
+			int bottom = top + child.getHeight();
+			viewRect.set(left, top, right, bottom);
+			return viewRect.contains((int) e.getRawX(), (int) e.getRawY());
+		}
 	};
 
 

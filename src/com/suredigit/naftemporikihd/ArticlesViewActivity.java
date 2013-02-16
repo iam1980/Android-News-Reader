@@ -55,7 +55,7 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 		super.onCreate(null);
 		//getSupportActionBar().setIcon(R.drawable.ic_naftemporiki);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
-
+		//Log.i(TAG,"Enteret Articles Activity");
 		
 		
 		switch (MainActivity.MEMSIZE) {

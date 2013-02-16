@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -35,8 +36,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
@@ -45,6 +49,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -372,15 +377,24 @@ public class MainActivity extends SherlockActivity  {
 						public void onItemClick(AdapterView<?> parent, View v,
 								int position, long id) {
 							// TODO Auto-generated method stub
-
+							//Log.i(TAG,"Clicked");
+//							Log.i(TAG,v.getClass().getName());
+//							if (v instanceof RelativeLayout){
+//								TextView tvTitle = (TextView)((RelativeLayout) v).getChildAt(1);
+//								if (tvTitle != null)
+//									tvTitle.setBackgroundColor(Color.RED);
+//							}
+							
 							v.playSoundEffect(SoundEffectConstants.CLICK);
 							//Article clickedArticle = (Article)parent.getItemAtPosition(position);
 							Intent intent = new Intent(MainActivity.this, ArticlesViewActivity.class);
 							intent.putExtra("parcel", myChan);
 							intent.putExtra("position", position);
 							intent.putExtra("chanPos", getPositionInEnabledChannels(myChan));
+							intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_NO_ANIMATION);
 							startActivity(intent);
-							overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+							//Log.i(TAG,"Sent Activity");
+							//overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
 						}}
 							);
 
@@ -405,7 +419,8 @@ public class MainActivity extends SherlockActivity  {
 	private class ArticleAdapter extends ArrayAdapter<Article> {
 
 		private ArrayList<Article> articles;
-
+		private Rect rect;
+		
 		public ArticleAdapter(Context context, int textViewResourceId, ArrayList<Article> objects) {
 			super(context, textViewResourceId, objects);
 			this.articles = objects;
@@ -417,11 +432,9 @@ public class MainActivity extends SherlockActivity  {
 
 			if (!(article.isDummy())){
 				View retval = LayoutInflater.from(parent.getContext()).inflate(R.layout.horizontal_list_item, null);  
-				TextView title = (TextView) retval.findViewById(R.id.title);  
-				ImageView thumb = (ImageView) retval.findViewById(R.id.image);
-
-
-
+				final TextView title = (TextView) retval.findViewById(R.id.title);  
+				final ImageView thumb = (ImageView) retval.findViewById(R.id.image);
+			
 				title.setText(article.getTitle());  
 
 				if(!(article.getThumbUrl() == null)){
