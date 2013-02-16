@@ -3,8 +3,9 @@
     android:id="@+id/topLevel"
     android:layout_width="match_parent"
     android:layout_height="match_parent" 
-    android:background="@drawable/radialback">
-    >
+    android:background="@drawable/radialback"
+    android:scrollbarThumbVertical="@drawable/scrollbar_vertical_thumb"
+    android:scrollbarSize="4dip">
 
     <LinearLayout
         android:id="@+id/LinearLayout1"

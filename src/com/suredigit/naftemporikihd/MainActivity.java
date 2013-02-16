@@ -69,7 +69,7 @@ public class MainActivity extends SherlockActivity  {
 	public static final String NEWSFILENAME = "new_file.xml";
 	public static final int SECONDSTOREFRESH = 600;
 
-	private static ArrayList<RssChannel> mRssChannels;
+	public static ArrayList<RssChannel> mRssChannels;
 	private ArrayList<RssHtmlDownloaderTask> mRssHtmlDownloaderTasks;
 
 	private LinearLayout myLinList;
@@ -85,6 +85,9 @@ public class MainActivity extends SherlockActivity  {
 
 	public static enum MemSize { LOW, MED, HIGH , ULTRA };
 	public static MemSize MEMSIZE = MemSize.HIGH;
+	
+	//This is used in ArticlesViewActivity for navigation purposes
+	public static String[] mRssTitles;
 
 	public static void loadPreferences() {	
 		SharedPreferences preferences = Singleton.getInstance().prefs;
@@ -136,6 +139,14 @@ public class MainActivity extends SherlockActivity  {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		ArrayList<String> rssChannelTitles = new ArrayList<String>();
+		for (RssChannel myChan : rssChans){
+			if(myChan.isEnabled())
+				rssChannelTitles.add(myChan.getTitle());
+		}
+		mRssTitles = new String[rssChannelTitles.size()];
+		rssChannelTitles.toArray(mRssTitles);		
 
 	}
 
@@ -178,13 +189,25 @@ public class MainActivity extends SherlockActivity  {
 			e.printStackTrace();
 		}
 
+		ArrayList<RssChannel> theReturnList;
+		
 		Type listType = new TypeToken<ArrayList<RssChannel>>() {}.getType();
 		if (flag) {
 			Gson gson = new Gson();
-			return gson.fromJson(sb.toString(),listType);
+			theReturnList =  gson.fromJson(sb.toString(),listType);
 		} else {
-			return defaultRssChannels;
+			theReturnList =  defaultRssChannels;
 		}
+		
+		ArrayList<String> rssChannelTitles = new ArrayList<String>();
+		for (RssChannel myChan : theReturnList){
+			if(myChan.isEnabled())
+				rssChannelTitles.add(myChan.getTitle());
+		}
+		mRssTitles = new String[rssChannelTitles.size()];
+		rssChannelTitles.toArray(mRssTitles);
+		
+		return theReturnList;
 	}
 
 	//	public static void loadChannels(){
@@ -378,13 +401,13 @@ public class MainActivity extends SherlockActivity  {
 								int position, long id) {
 							// TODO Auto-generated method stub
 							//Log.i(TAG,"Clicked");
-//							Log.i(TAG,v.getClass().getName());
-//							if (v instanceof RelativeLayout){
-//								TextView tvTitle = (TextView)((RelativeLayout) v).getChildAt(1);
-//								if (tvTitle != null)
-//									tvTitle.setBackgroundColor(Color.RED);
-//							}
-							
+							//							Log.i(TAG,v.getClass().getName());
+							//							if (v instanceof RelativeLayout){
+							//								TextView tvTitle = (TextView)((RelativeLayout) v).getChildAt(1);
+							//								if (tvTitle != null)
+							//									tvTitle.setBackgroundColor(Color.RED);
+							//							}
+
 							v.playSoundEffect(SoundEffectConstants.CLICK);
 							//Article clickedArticle = (Article)parent.getItemAtPosition(position);
 							Intent intent = new Intent(MainActivity.this, ArticlesViewActivity.class);
@@ -420,7 +443,7 @@ public class MainActivity extends SherlockActivity  {
 
 		private ArrayList<Article> articles;
 		private Rect rect;
-		
+
 		public ArticleAdapter(Context context, int textViewResourceId, ArrayList<Article> objects) {
 			super(context, textViewResourceId, objects);
 			this.articles = objects;
@@ -434,7 +457,53 @@ public class MainActivity extends SherlockActivity  {
 				View retval = LayoutInflater.from(parent.getContext()).inflate(R.layout.horizontal_list_item, null);  
 				final TextView title = (TextView) retval.findViewById(R.id.title);  
 				final ImageView thumb = (ImageView) retval.findViewById(R.id.image);
-			
+
+				thumb.setOnTouchListener(new OnTouchListener()
+				{
+					@Override
+					public boolean onTouch(View v, MotionEvent event) {
+						switch (event.getAction()) {
+
+
+						case MotionEvent.ACTION_DOWN: {
+							title.setBackgroundColor(Color.parseColor("#950005"));
+							rect = new Rect(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+							break;
+						}
+
+						case MotionEvent.ACTION_MOVE:{
+							//							Rect rect = new Rect();
+							//							rect.left = thumb.getLeft();
+							//							rect.top = thumb.getTop();
+							//							rect.bottom = thumb.getBottom();
+							//							rect.right = thumb.getRight();
+							//							System.out.println(rect.left+","+rect.top);
+
+
+
+							if(!rect.contains((int)event.getX(), (int)event.getY())) {
+								// Outside the bounds
+								title.setBackgroundColor(Color.parseColor("#CC000000"));
+							}
+							break;        
+						}
+						
+						case MotionEvent.ACTION_CANCEL: {
+							title.setBackgroundColor(Color.parseColor("#CC000000"));
+							break;
+						}
+
+						case MotionEvent.ACTION_UP: {
+							title.setBackgroundColor(Color.parseColor("#CC000000"));
+							break;
+						}
+						}
+						return true;
+					}
+				});
+
+
+
 				title.setText(article.getTitle());  
 
 				if(!(article.getThumbUrl() == null)){

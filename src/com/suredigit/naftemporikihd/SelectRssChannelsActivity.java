@@ -119,7 +119,8 @@ public class SelectRssChannelsActivity extends SherlockListActivity
 		//		Type listType = new TypeToken<ArrayList<RssChannel>>() {}.getType();
 		//		mRssChannels = gson.fromJson(json,listType);
 
-		mRssChannels = MainActivity.loadChannelsFromFile();
+		//mRssChannels = MainActivity.loadChannelsFromFile();
+		mRssChannels = MainActivity.mRssChannels;
 		//new LoadChannelsTask().execute();
 
 		adapter = new ChannelAdapter(this, R.layout.list_item_checkable, mRssChannels);

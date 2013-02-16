@@ -82,15 +82,17 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 //		Type listType = new TypeToken<ArrayList<RssChannel>>() {}.getType();
 //		mRssChannels = gson.fromJson(json,listType);
 		
-		mRssChannels = MainActivity.loadChannelsFromFile();
+		//mRssChannels = MainActivity.loadChannelsFromFile();
 
-		ArrayList<String> rssChannels = new ArrayList<String>();
-		for (RssChannel myChan : mRssChannels){
-			if(myChan.isEnabled())
-				rssChannels.add(myChan.getTitle());
-		}
-		mRssTitles = new String[rssChannels.size()];
-		rssChannels.toArray(mRssTitles);
+//		ArrayList<String> rssChannels = new ArrayList<String>();
+//		for (RssChannel myChan : mRssChannels){
+//			if(myChan.isEnabled())
+//				rssChannels.add(myChan.getTitle());
+//		}
+//		mRssTitles = new String[rssChannels.size()];
+//		rssChannels.toArray(mRssTitles);
+		
+		mRssTitles = MainActivity.mRssTitles;
 
 		/** Create an array adapter to populate dropdownlist */
 		Context context = getSupportActionBar().getThemedContext();
@@ -289,7 +291,7 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 			finish();
 			overridePendingTransition(0, 0);
 			Intent intent = new Intent(ArticlesViewActivity.this, ArticlesViewActivity.class);
-			intent.putExtra("parcel", mRssChannels.get(MainActivity.getRealChanPositionByTitle(mRssTitles[itemPosition])));
+			intent.putExtra("parcel", MainActivity.mRssChannels.get(MainActivity.getRealChanPositionByTitle(mRssTitles[itemPosition])));
 			intent.putExtra("position", 0);
 			intent.putExtra("chanPos", MainActivity.getPositionInEnabledChannelsByTitle(mRssTitles[itemPosition]));
 			startActivity(intent);
