@@ -18,11 +18,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.w3c.dom.Document;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -31,7 +29,6 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -39,7 +36,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -49,7 +45,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,7 +58,7 @@ import com.google.gson.reflect.TypeToken;
 
 public class MainActivity extends SherlockActivity  {
 
-	protected static final String VERSION = "1.0.1";
+	//protected static final String VERSION = "1.0.3";
 	private static final String TAG = "NaftermporikiHD";
 	public static final String BASEURL = "http://www.naftemporiki.gr";
 	public static final String NEWSFILENAME = "new_file.xml";
@@ -80,19 +75,21 @@ public class MainActivity extends SherlockActivity  {
 
 	public static boolean pNightMode;
 	public static int pFontSize;
+	public static boolean pCapitalizedCategories;
 
 	private ChangeLog cl;
 
 	public static enum MemSize { LOW, MED, HIGH , ULTRA };
 	public static MemSize MEMSIZE = MemSize.HIGH;
-	
+
 	//This is used in ArticlesViewActivity for navigation purposes
 	public static String[] mRssTitles;
 
 	public static void loadPreferences() {	
 		SharedPreferences preferences = Singleton.getInstance().prefs;
 		pNightMode = preferences.getBoolean("nightmode", false);
-		pFontSize = preferences.getInt("fontsize",18);	
+		pFontSize = preferences.getInt("fontsize",18);
+		pCapitalizedCategories = preferences.getBoolean("cs_capitlisecats", false);
 
 	}
 
@@ -100,6 +97,7 @@ public class MainActivity extends SherlockActivity  {
 		SharedPreferences.Editor editor = Singleton.getInstance().prefs.edit();
 		editor.putBoolean("nightmode", pNightMode);
 		editor.putInt("fontsize", pFontSize);
+		editor.putBoolean("cs_capitlisecats", pCapitalizedCategories);
 		editor.commit();
 	}
 
@@ -139,7 +137,7 @@ public class MainActivity extends SherlockActivity  {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		ArrayList<String> rssChannelTitles = new ArrayList<String>();
 		for (RssChannel myChan : rssChans){
 			if(myChan.isEnabled())
@@ -154,14 +152,14 @@ public class MainActivity extends SherlockActivity  {
 
 		ArrayList<RssChannel> defaultRssChannels = new ArrayList<RssChannel>();
 
-		defaultRssChannels.add(new RssChannel("–ÔÎÈÙÈÍﬁ",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=2"));		
-		defaultRssChannels.add(new RssChannel(" ÔÈÌ˘Ìﬂ·",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=3"));		
-		defaultRssChannels.add(new RssChannel(" ¸ÛÏÔÚ",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=4"));
-		defaultRssChannels.add(new RssChannel("œÈÍÔÌÔÏﬂ· & ¡„ÔÒ›Ú",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=1"));
-		defaultRssChannels.add(new RssChannel("¡ËÎÁÙÈÍ‹",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=5"));
-		defaultRssChannels.add(new RssChannel("–ÔÎÈÙÈÛÏ¸Ú",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=6"));
-		defaultRssChannels.add(new RssChannel("–ÂÒÈ‚‹ÎÎÔÌ",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=8"));
-		defaultRssChannels.add(new RssChannel("‘Â˜ÌÔÎÔ„ﬂ· - ≈ÈÛÙﬁÏÁ",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=7"));
+		defaultRssChannels.add(new RssChannel("–œÀ…‘… «",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=2"));		
+		defaultRssChannels.add(new RssChannel(" œ…ÕŸÕ…¡",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=3"));		
+		defaultRssChannels.add(new RssChannel(" œ”Ãœ”",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=4"));
+		defaultRssChannels.add(new RssChannel("œ… œÕœÃ…¡ & ¡√œ—≈”",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=1"));
+		defaultRssChannels.add(new RssChannel("¡»À«‘… ¡",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=5"));
+		defaultRssChannels.add(new RssChannel("–œÀ…‘…”Ãœ”",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=6"));
+		defaultRssChannels.add(new RssChannel("–≈—…¬¡ÀÀœÕ",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=8"));
+		defaultRssChannels.add(new RssChannel("‘≈◊ÕœÀœ√…¡ - ≈–…”‘«Ã«",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=7"));
 		//		Gson gson = new Gson();
 		//		String jsonDef = gson.toJson(defaultRssChannels); 
 
@@ -190,7 +188,7 @@ public class MainActivity extends SherlockActivity  {
 		}
 
 		ArrayList<RssChannel> theReturnList;
-		
+
 		Type listType = new TypeToken<ArrayList<RssChannel>>() {}.getType();
 		if (flag) {
 			Gson gson = new Gson();
@@ -198,7 +196,28 @@ public class MainActivity extends SherlockActivity  {
 		} else {
 			theReturnList =  defaultRssChannels;
 		}
-		
+
+		//CHANGESET 1.0.3
+		if(!(pCapitalizedCategories)){
+			for (RssChannel myChan : theReturnList){
+				
+				String oldTitle = myChan.getTitle().toUpperCase();
+				
+				oldTitle = oldTitle.replaceAll("\u0386", "¡");
+				oldTitle = oldTitle.replaceAll("\u0388", "E");
+				oldTitle = oldTitle.replaceAll("\u0389", "H");
+				oldTitle = oldTitle.replaceAll("\u038a", "I");
+				oldTitle = oldTitle.replaceAll("\u038c", "O");
+				oldTitle = oldTitle.replaceAll("\u038e", "Y");
+				oldTitle = oldTitle.replaceAll("\u038f", "Ÿ");
+
+				myChan.setTitle(oldTitle);
+			}
+			pCapitalizedCategories = true;
+			savePreferences();
+		}
+		//
+
 		ArrayList<String> rssChannelTitles = new ArrayList<String>();
 		for (RssChannel myChan : theReturnList){
 			if(myChan.isEnabled())
@@ -206,7 +225,7 @@ public class MainActivity extends SherlockActivity  {
 		}
 		mRssTitles = new String[rssChannelTitles.size()];
 		rssChannelTitles.toArray(mRssTitles);
-		
+
 		return theReturnList;
 	}
 
@@ -349,6 +368,7 @@ public class MainActivity extends SherlockActivity  {
 					theChan.setArticles(NaftemporikiParsers.populateArticles(doc));
 					theChan.setHtml(null);
 
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				} 
@@ -381,15 +401,19 @@ public class MainActivity extends SherlockActivity  {
 					hListView.setLayoutParams(hLparams);
 
 					TextView channTitleTV = new TextView(this);
-					channTitleTV.setText(theChan.getTitle());
+					//channTitleTV.setText(theChan.getTitle());
+					channTitleTV.setText(theChan.getTitle().toUpperCase());
 					channTitleTV.setTextAppearance(this, android.R.style.TextAppearance_Medium);
-					channTitleTV.setTextSize(15);
+					channTitleTV.setTextSize(14);
 					channTitleTV.setTypeface(null,Typeface.BOLD);
 					LinearLayout.LayoutParams channTitleTVparams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 					channTitleTVparams.setMargins(6, 2, 0, 8); //substitute parameters for left, top, right, bottom
+					//channTitleTVparams.setMargins(6, 8, 0, 8); //substitute parameters for left, top, right, bottom
 					channTitleTV.setLayoutParams(channTitleTVparams);
 
 					TextView spacerTV = new TextView(this);
+					//					spacerTV.setTextAppearance(this, android.R.style.TextAppearance_Small);
+					spacerTV.setTextSize(TypedValue.COMPLEX_UNIT_SP, 5);
 
 					myLinList.addView(channTitleTV);
 					myLinList.addView(hListView);
@@ -487,7 +511,7 @@ public class MainActivity extends SherlockActivity  {
 							}
 							break;        
 						}
-						
+
 						case MotionEvent.ACTION_CANCEL: {
 							title.setBackgroundColor(Color.parseColor("#CC000000"));
 							break;
@@ -644,7 +668,7 @@ public class MainActivity extends SherlockActivity  {
 	String downloadHtml(String url) {
 		final HttpClient client = new DefaultHttpClient();
 		final HttpGet getRequest = new HttpGet(url);
-		Log.w(TAG, "starte d d/ling" + url); 
+		//Log.w(TAG, "starte d d/ling" + url); 
 		try {
 			HttpResponse response = client.execute(getRequest);
 			final int statusCode = response.getStatusLine().getStatusCode();
@@ -660,7 +684,7 @@ public class MainActivity extends SherlockActivity  {
 
 					inputStream = entity.getContent(); 
 					final String html = convertStreamToString(inputStream);
-					Log.w(TAG, "finished d/ling" + url); 
+					//Log.w(TAG, "finished d/ling" + url); 
 					return html;
 				} finally {
 					if (inputStream != null) {

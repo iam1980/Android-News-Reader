@@ -39,7 +39,8 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 	String[] mRssTitles;
 	ArrayList<RssChannel> mRssChannels = new ArrayList<RssChannel>();
 
-	private int mNaviCounter = 0;
+	private boolean mNaviFirstHit= true;
+	private int mNaviCurrentPos;
 	
 	private int mChanPos;
 	
@@ -287,17 +288,28 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 
 	@Override
 	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-		if (mNaviCounter != 0){
+		if (mNaviFirstHit) {
+			mNaviCurrentPos = itemPosition;
+			mNaviFirstHit = false;
+			return true;
+		}
+			RssChannel targetChan = MainActivity.mRssChannels.get(MainActivity.getRealChanPositionByTitle(mRssTitles[itemPosition]));
+			if (targetChan == null){
+				getSupportActionBar().setSelectedNavigationItem(mNaviCurrentPos);
+				return false;
+			}
+			if (targetChan.getArticles().size() == 0){
+				getSupportActionBar().setSelectedNavigationItem(mNaviCurrentPos);
+				return false;
+			}
+			
 			finish();
 			overridePendingTransition(0, 0);
 			Intent intent = new Intent(ArticlesViewActivity.this, ArticlesViewActivity.class);
-			intent.putExtra("parcel", MainActivity.mRssChannels.get(MainActivity.getRealChanPositionByTitle(mRssTitles[itemPosition])));
+			intent.putExtra("parcel", targetChan);
 			intent.putExtra("position", 0);
 			intent.putExtra("chanPos", MainActivity.getPositionInEnabledChannelsByTitle(mRssTitles[itemPosition]));
 			startActivity(intent);
-			return false;
-		}
-		mNaviCounter++;
 		return false;
 	}
 
