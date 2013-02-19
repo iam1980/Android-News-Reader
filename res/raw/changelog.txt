@@ -21,9 +21,8 @@
   <body>
 $ 1.0.4
   % Version 1.0.4
-  _ 2013-02-
-    * 
-    *     
+  _ 2013-02-19
+    * <b>NEW FEATURE:</b> Offline mode <br>You can now read the news without an active Internet connection. Just remember to hit the refresh button before boarding that plane!
 $ 1.0.3
   % Version 1.0.3
   _ 2013-02-18

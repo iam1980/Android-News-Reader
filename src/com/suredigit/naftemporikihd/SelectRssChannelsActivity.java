@@ -86,6 +86,15 @@ public class SelectRssChannelsActivity extends SherlockListActivity
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		//check if MainActivity exists, if not finish()
+		//HACKY BUT WORKS!
+		if(MainActivity.mRssChannels == null){
+			MainActivity.mRssChannels = new ArrayList<RssChannel>();
+			finish();
+		}
+		
+		
+		
 		setTheme(R.style.Theme_Sherlock);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.checkable_main);

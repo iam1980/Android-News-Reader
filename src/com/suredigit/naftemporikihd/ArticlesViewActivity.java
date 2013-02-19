@@ -48,6 +48,14 @@ public class ArticlesViewActivity extends SherlockFragmentActivity implements Ac
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		//check if MainActivity exists, if not finish()
+		//HACKY BUT WORKS!
+		if(MainActivity.mRssTitles == null){
+
+			MainActivity.mRssTitles = new String[0];
+			finish();
+		}
+		
 		if(MainActivity.pNightMode) {
 			setTheme(R.style.Theme_Sherlock);	
 		} else 

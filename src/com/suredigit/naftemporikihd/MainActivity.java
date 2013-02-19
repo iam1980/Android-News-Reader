@@ -16,6 +16,9 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.w3c.dom.Document;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
@@ -61,8 +64,12 @@ public class MainActivity extends SherlockActivity  {
 	//protected static final String VERSION = "1.0.3";
 	private static final String TAG = "NaftermporikiHD";
 	public static final String BASEURL = "http://www.naftemporiki.gr";
+	public static final String CHECKURL = BASEURL+ "/api/legacy/android/GetNews.aspx?&cat=999";
 	public static final String NEWSFILENAME = "new_file.xml";
 	public static final int SECONDSTOREFRESH = 600;
+	private static int CONN_TIMEOUT = 10000; //millis
+
+	private boolean mHostIsReachable = false;
 
 	public static ArrayList<RssChannel> mRssChannels;
 	private ArrayList<RssHtmlDownloaderTask> mRssHtmlDownloaderTasks;
@@ -78,12 +85,31 @@ public class MainActivity extends SherlockActivity  {
 	public static boolean pCapitalizedCategories;
 
 	private ChangeLog cl;
+	private MenuItem mRefreshMenuItem;
 
 	public static enum MemSize { LOW, MED, HIGH , ULTRA };
 	public static MemSize MEMSIZE = MemSize.HIGH;
 
 	//This is used in ArticlesViewActivity for navigation purposes
 	public static String[] mRssTitles;
+
+	protected MenuItem refreshItem = null;
+
+	protected void setRefreshItem(MenuItem item) {
+		refreshItem = item;
+	}
+
+	protected void stopMenuIconRefresh() {
+		if (refreshItem != null) {
+			refreshItem.setActionView(null);
+		}
+	}
+
+	protected void runMenuIconRefresh() {
+		if (refreshItem != null) {
+			refreshItem.setActionView(R.layout.indeterminate_progress_action);
+		}
+	}
 
 	public static void loadPreferences() {	
 		SharedPreferences preferences = Singleton.getInstance().prefs;
@@ -102,7 +128,8 @@ public class MainActivity extends SherlockActivity  {
 	}
 
 	public static void updateLastFetch(){
-		SharedPreferences.Editor editor = Singleton.getInstance().prefs.edit();
+		Singleton.getInstance();
+		SharedPreferences.Editor editor = Singleton.prefs.edit();
 		long timestamp = System.currentTimeMillis()/1000;
 		editor.putLong("lastfetch", timestamp);	
 		editor.commit();
@@ -200,9 +227,9 @@ public class MainActivity extends SherlockActivity  {
 		//CHANGESET 1.0.3
 		if(!(pCapitalizedCategories)){
 			for (RssChannel myChan : theReturnList){
-				
+
 				String oldTitle = myChan.getTitle().toUpperCase();
-				
+
 				oldTitle = oldTitle.replaceAll("\u0386", "Α");
 				oldTitle = oldTitle.replaceAll("\u0388", "E");
 				oldTitle = oldTitle.replaceAll("\u0389", "H");
@@ -313,13 +340,20 @@ public class MainActivity extends SherlockActivity  {
 		@Override
 		protected void onPostExecute(ArrayList<RssChannel> result){
 			mRssChannels = result;
-			refreshOrBuildUI();
+			if (getLastFetch() + SECONDSTOREFRESH < (System.currentTimeMillis()/1000)){
+				runMenuIconRefresh();
+				CheckIfReachableTask task = new CheckIfReachableTask(CHECKURL,false);
+				task.execute();
+			}  else {
+				buildUI();
+				updateThumbnails();
+			}
 		}
 	}
 
-
 	public void refreshOrBuildUI(){
-		if (getLastFetch() + SECONDSTOREFRESH < (System.currentTimeMillis()/1000)){
+		if ((getLastFetch() + SECONDSTOREFRESH < (System.currentTimeMillis()/1000)) &&
+				mHostIsReachable){
 			refreshChannels();
 		} else {
 			buildUI();
@@ -329,29 +363,37 @@ public class MainActivity extends SherlockActivity  {
 
 	@SuppressLint("NewApi")
 	private void refreshChannels(){
-		mProgressDialog = new ProgressDialog(MainActivity.this);
-		mProgressDialog.setMessage("Μεταφώρτωση Ειδήσεων");
-		mProgressDialog.setIndeterminate(false);
-		mProgressDialog.setCancelable(false);
-		mProgressDialog.setMax(getEnabledChanCount());
-		mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		if (mHostIsReachable){
+			mProgressDialog = new ProgressDialog(MainActivity.this);
+			mProgressDialog.setMessage("Μεταφώρτωση Ειδήσεων");
+			mProgressDialog.setIndeterminate(false);
+			mProgressDialog.setCancelable(false);
+			mProgressDialog.setMax(getEnabledChanCount());
+			mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 
 
 
-		mRssHtmlDownloaderTasks = new ArrayList<RssHtmlDownloaderTask>();
-		for (RssChannel theChan : mRssChannels){
-			if (theChan.isEnabled()){
-				if(theChan.getArticles() != null) theChan.getArticles().clear();
-				RssHtmlDownloaderTask task = new RssHtmlDownloaderTask(theChan);	
-				if (android.os.Build.VERSION.SDK_INT>=android.os.Build.VERSION_CODES.HONEYCOMB) {
-					task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,theChan.getUrl());
-				} else {
-					task.execute(theChan.getUrl());
+			mRssHtmlDownloaderTasks = new ArrayList<RssHtmlDownloaderTask>();
+			for (RssChannel theChan : mRssChannels){
+				if (theChan.isEnabled()){
+					if(theChan.getArticles() != null) theChan.getArticles().clear();
+					RssHtmlDownloaderTask task = new RssHtmlDownloaderTask(theChan);	
+					if (android.os.Build.VERSION.SDK_INT>=android.os.Build.VERSION_CODES.HONEYCOMB) {
+						task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,theChan.getUrl());
+					} else {
+						task.execute(theChan.getUrl());
+					}
+					mRssHtmlDownloaderTasks.add(task);
 				}
-				mRssHtmlDownloaderTasks.add(task);
 			}
+			updateLastFetch();	
+		} else {
+			java.util.Date time= new java.util.Date((long)getLastFetch()*1000);
+			String lastFetchTxt = time.toString();
+			Toast toast = Toast.makeText(this, "Offline mode (last update "+lastFetchTxt+")", Toast.LENGTH_LONG);
+			toast.show();
 		}
-		updateLastFetch();	
+
 	}
 
 	private void parseChannels(){
@@ -404,16 +446,16 @@ public class MainActivity extends SherlockActivity  {
 					//channTitleTV.setText(theChan.getTitle());
 					channTitleTV.setText(theChan.getTitle().toUpperCase());
 					channTitleTV.setTextAppearance(this, android.R.style.TextAppearance_Medium);
-					channTitleTV.setTextSize(14);
+					channTitleTV.setTextSize(13);
 					channTitleTV.setTypeface(null,Typeface.BOLD);
 					LinearLayout.LayoutParams channTitleTVparams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-					channTitleTVparams.setMargins(6, 2, 0, 8); //substitute parameters for left, top, right, bottom
+					channTitleTVparams.setMargins(6, 8, 0, 8); //substitute parameters for left, top, right, bottom
 					//channTitleTVparams.setMargins(6, 8, 0, 8); //substitute parameters for left, top, right, bottom
 					channTitleTV.setLayoutParams(channTitleTVparams);
 
 					TextView spacerTV = new TextView(this);
 					//					spacerTV.setTextAppearance(this, android.R.style.TextAppearance_Small);
-					spacerTV.setTextSize(TypedValue.COMPLEX_UNIT_SP, 5);
+					spacerTV.setTextSize(TypedValue.COMPLEX_UNIT_SP, 4);
 
 					myLinList.addView(channTitleTV);
 					myLinList.addView(hListView);
@@ -562,7 +604,10 @@ public class MainActivity extends SherlockActivity  {
 
 			return true;
 		case R.id.menu_refresh:
-			refreshChannels();
+			mRefreshMenuItem.setEnabled(false);
+			runMenuIconRefresh();
+			CheckIfReachableTask task = new CheckIfReachableTask(CHECKURL,true);
+			task.execute();
 
 			return true;			
 		case R.id.menu_about:
@@ -576,7 +621,6 @@ public class MainActivity extends SherlockActivity  {
 			return true;
 
 		case R.id.menu_rate:
-			System.out.println(MainActivity.this.getPackageName());
 			Uri uri = Uri.parse("market://details?id=" + MainActivity.this.getPackageName());
 			Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
 			try {
@@ -595,6 +639,17 @@ public class MainActivity extends SherlockActivity  {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		com.actionbarsherlock.view.MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.activity_main, menu);	
+		mRefreshMenuItem = menu.findItem(R.id.menu_refresh);
+		setRefreshItem(mRefreshMenuItem);
+
+		//AnimationDrawable dt;
+
+		//boolean mIsRefreshing = true;
+
+		//mRefreshMenuItem.setActionView(null);
+		//ImageView iv = (ImageView) mRefreshMenuItem.getActionView().findViewById(R.id.loadingImageView);
+		//((AnimationDrawable) iv.getDrawable()).start();
+
 		return true;
 	}
 
@@ -666,14 +721,19 @@ public class MainActivity extends SherlockActivity  {
 	}
 
 	String downloadHtml(String url) {
-		final HttpClient client = new DefaultHttpClient();
+		HttpParams httpParameters = new BasicHttpParams();
+		int timeoutConnection = CONN_TIMEOUT;
+		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+		int timeoutSocket = CONN_TIMEOUT;
+		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+		final HttpClient client = new DefaultHttpClient(httpParameters);
 		final HttpGet getRequest = new HttpGet(url);
 		//Log.w(TAG, "starte d d/ling" + url); 
 		try {
 			HttpResponse response = client.execute(getRequest);
 			final int statusCode = response.getStatusLine().getStatusCode();
 			if (statusCode != HttpStatus.SC_OK) { 
-				Log.w(TAG, "Error " + statusCode + " while downloading HTML from " + url); 
+				//Log.w(TAG, "Error " + statusCode + " while downloading HTML from " + url); 
 				return null;
 			}
 
@@ -696,9 +756,64 @@ public class MainActivity extends SherlockActivity  {
 		} catch (Exception e) {
 			// Could provide a more explicit error message for IOException or IllegalStateException
 			getRequest.abort();
-			Log.w("ImageDownloader", "Error while retrieving bitmap from " + url + e.toString());
+			//Log.w("downloadHTML", "Error while retrieving bitmap from " + url + e.toString());
 		} 
 		return null;
+	}
+
+
+	private class CheckIfReachableTask extends AsyncTask<String, Void, Boolean> {
+		String theUrl;
+		Boolean fromRefresh;
+		public CheckIfReachableTask(String theUrl,Boolean fromRefresh) {
+			this.theUrl = theUrl;
+			this.fromRefresh = fromRefresh;
+		}
+
+		protected Boolean doInBackground(String... urls) {
+
+			return checkIfReachable(theUrl);
+		}
+		protected void onPostExecute(Boolean result) {
+			stopMenuIconRefresh();
+			mHostIsReachable = result;
+			if (!(fromRefresh))
+				refreshOrBuildUI();
+			else {
+				refreshChannels();
+				mRefreshMenuItem.setEnabled(true);
+			}
+		}
+	}
+
+
+
+
+	boolean checkIfReachable(String url) {
+
+		HttpParams httpParameters = new BasicHttpParams();
+		int timeoutConnection = CONN_TIMEOUT;
+		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+		int timeoutSocket = CONN_TIMEOUT;
+		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+		final HttpClient client = new DefaultHttpClient(httpParameters);
+		final HttpGet getRequest = new HttpGet(url);
+
+		try {
+			HttpResponse response = client.execute(getRequest);
+			final int statusCode = response.getStatusLine().getStatusCode();
+			if (statusCode != HttpStatus.SC_OK) { 
+				//Log.w(TAG, "Error " + statusCode + " while downloading HTML from " + url); 
+				return false;
+			}
+
+			return true;
+		} catch (Exception e) {
+			// Could provide a more explicit error message for IOException or IllegalStateException
+			getRequest.abort();
+			//Log.w("checkifReachable", "Cannot reach " + url + e.toString());
+			return false;
+		} 
 	}
 
 	public static String convertStreamToString(InputStream is) {
