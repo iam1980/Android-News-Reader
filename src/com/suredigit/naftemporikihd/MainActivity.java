@@ -43,6 +43,8 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -57,6 +59,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.suredigit.inappfeedback.FeedbackDialog;
 
 
 public class MainActivity extends SherlockActivity  {
@@ -574,7 +577,9 @@ public class MainActivity extends SherlockActivity  {
 
 				if(!(article.getThumbUrl() == null)){
 					thumb.setBackgroundColor(Color.BLACK);
+					Animation myFadeInAnimation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.fade_in);
 					imageDownloader.download(article.getThumbUrl(), (ImageView) thumb);
+					thumb.startAnimation(myFadeInAnimation);
 					int pxX = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 150, getResources().getDisplayMetrics());
 					int pxY = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 150, getResources().getDisplayMetrics());				
 					thumb.getLayoutParams().height = pxX;
@@ -611,6 +616,9 @@ public class MainActivity extends SherlockActivity  {
 
 			return true;			
 		case R.id.menu_about:
+			
+			//FeedbackDialog myDialog = new FeedbackDialog(MainActivity.this,"APPID#()*");
+			//myDialog.show();
 			Intent intent = new Intent(MainActivity.this, AboutFullscreenActivity.class);
 			startActivity(intent);
 
