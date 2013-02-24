@@ -50,6 +50,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,7 +60,6 @@ import com.actionbarsherlock.view.MenuItem;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.suredigit.inappfeedback.FeedbackDialog;
 
 
 public class MainActivity extends SherlockActivity  {
@@ -368,7 +368,7 @@ public class MainActivity extends SherlockActivity  {
 	private void refreshChannels(){
 		if (mHostIsReachable){
 			mProgressDialog = new ProgressDialog(MainActivity.this);
-			mProgressDialog.setMessage("Μεταφώρτωση Ειδήσεων");
+			mProgressDialog.setMessage("Μεταφόρτωση Ειδήσεων");
 			mProgressDialog.setIndeterminate(false);
 			mProgressDialog.setCancelable(false);
 			mProgressDialog.setMax(getEnabledChanCount());
@@ -436,7 +436,7 @@ public class MainActivity extends SherlockActivity  {
 			for (RssChannel theChan : mRssChannels){
 				if ((!(theChan.getArticles() == null)) && theChan.isEnabled()){
 					final RssChannel myChan = theChan;
-					HorizontalListView hListView = new HorizontalListView(this,null);
+					final HorizontalListView hListView = new HorizontalListView(this,null);
 					ArticleAdapter myAdapter = new ArticleAdapter(this, R.layout.horizontal_list_item, theChan.getArticles());
 					hListView.setAdapter(myAdapter);
 
@@ -460,6 +460,31 @@ public class MainActivity extends SherlockActivity  {
 					//					spacerTV.setTextAppearance(this, android.R.style.TextAppearance_Small);
 					spacerTV.setTextSize(TypedValue.COMPLEX_UNIT_SP, 4);
 
+
+					hListView.setOnListEdgeReachedListener(new HorizontalListView.OnListEdgeReachedListener() {				
+						@Override
+						public void onListEdgeReached(int edge) {
+							if (edge == 0){
+								final RelativeLayout firstItem = (RelativeLayout)hListView.getChildAt(0);
+								if(firstItem != null){
+									if(firstItem.getChildAt(2) != null){
+										ImageView edgeIV = (ImageView)firstItem.getChildAt(2);
+										//edgeIV.setVisibility(View.VISIBLE);
+										Animation myFadeInAnimation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.fade_in);
+										Animation myFadeOutAnimation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.fade_out);
+										edgeIV.startAnimation(myFadeInAnimation);
+										edgeIV.startAnimation(myFadeOutAnimation);
+										//hListView.scrollTo(800);
+									}
+								}
+							}
+
+						}
+					});
+					
+					
+					
+					
 					myLinList.addView(channTitleTV);
 					myLinList.addView(hListView);
 					myLinList.addView(spacerTV);
@@ -616,7 +641,7 @@ public class MainActivity extends SherlockActivity  {
 
 			return true;			
 		case R.id.menu_about:
-			
+
 			//FeedbackDialog myDialog = new FeedbackDialog(MainActivity.this,"APPID#()*");
 			//myDialog.show();
 			Intent intent = new Intent(MainActivity.this, AboutFullscreenActivity.class);

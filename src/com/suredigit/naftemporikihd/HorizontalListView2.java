@@ -30,7 +30,6 @@ package com.suredigit.naftemporikihd;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
@@ -39,14 +38,11 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewParent;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.Scroller;
 
-public class HorizontalListView extends AdapterView<ListAdapter> implements OnScrollListener{
+public class HorizontalListView2 extends AdapterView<ListAdapter> {
 
 	public boolean mAlwaysOverrideTouch = true;
 	protected ListAdapter mAdapter;
@@ -63,20 +59,14 @@ public class HorizontalListView extends AdapterView<ListAdapter> implements OnSc
 	private OnItemClickListener mOnItemClicked;
 	private OnItemLongClickListener mOnItemLongClicked;
 	private boolean mDataChanged = false;
+	
 
-	private float mLastX;
-	private float mLastY;
-	private float mDiffX;
-	private float mDiffY;    	
-
-	private OnListEdgeReachedListener mOnEdgeReached;
-
-	public HorizontalListView(Context context, AttributeSet attrs) {
+	public HorizontalListView2(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		initView();
 	}
-
-	private synchronized void initView() {
+	
+	private void initView() {
 		mLeftViewIndex = -1;
 		mRightViewIndex = 0;
 		mDisplayOffset = 0;
@@ -86,40 +76,38 @@ public class HorizontalListView extends AdapterView<ListAdapter> implements OnSc
 		mScroller = new Scroller(getContext());
 		mGesture = new GestureDetector(getContext(), mOnGesture);
 	}
-
+	
 	@Override
 	public void setOnItemSelectedListener(AdapterView.OnItemSelectedListener listener) {
 		mOnItemSelected = listener;
 	}
-
+	
 	@Override
 	public void setOnItemClickListener(AdapterView.OnItemClickListener listener){
 		mOnItemClicked = listener;
 	}
-
+	
 	@Override
 	public void setOnItemLongClickListener(AdapterView.OnItemLongClickListener listener) {
 		mOnItemLongClicked = listener;
 	}
 
-	private DataSetObserver mDataObserver = new DataSetObserver() {
+	private final DataSetObserver mDataObserver = new DataSetObserver() {
 
 		@Override
 		public void onChanged() {
-			synchronized(HorizontalListView.this){
+			synchronized(HorizontalListView2.this){
 				mDataChanged = true;
 			}
 			invalidate();
-			requestLayout();
 		}
 
 		@Override
 		public void onInvalidated() {
 			reset();
 			invalidate();
-			requestLayout();
 		}
-
+		
 	};
 
 	@Override
@@ -142,39 +130,37 @@ public class HorizontalListView extends AdapterView<ListAdapter> implements OnSc
 		mAdapter.registerDataSetObserver(mDataObserver);
 		reset();
 	}
-
-	private synchronized void reset(){
+	
+	private void reset(){
 		initView();
 		removeAllViewsInLayout();
-		requestLayout();
+		invalidate();
 	}
 
 	@Override
 	public void setSelection(int position) {
 		//TODO: implement
 	}
-
+	
 	private void addAndMeasureChild(final View child, int viewPos) {
 		LayoutParams params = child.getLayoutParams();
 		if(params == null) {
-			params = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+			params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		}
 
 		addViewInLayout(child, viewPos, params, true);
 		child.measure(MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.AT_MOST),
 				MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.AT_MOST));
 	}
-
-
+	
+	
 
 	@Override
-	protected synchronized void onLayout(boolean changed, int left, int top, int right, int bottom) {
-		super.onLayout(changed, left, top, right, bottom);
-
+	public void computeScroll() {
 		if(mAdapter == null){
 			return;
 		}
-
+		
 		if(mDataChanged){
 			int oldCurrentX = mCurrentX;
 			initView();
@@ -186,8 +172,10 @@ public class HorizontalListView extends AdapterView<ListAdapter> implements OnSc
 		if(mScroller.computeScrollOffset()){
 			int scrollx = mScroller.getCurrX();
 			mNextX = scrollx;
+			
+			postInvalidate();
 		}
-
+		
 		if(mNextX <= 0){
 			mNextX = 0;
 			mScroller.forceFinished(true);
@@ -196,26 +184,24 @@ public class HorizontalListView extends AdapterView<ListAdapter> implements OnSc
 			mNextX = mMaxX;
 			mScroller.forceFinished(true);
 		}
-
+		
 		int dx = mCurrentX - mNextX;
-
+		
 		removeNonVisibleItems(dx);
 		fillList(dx);
 		positionItems(dx);
-
+		
 		mCurrentX = mNextX;
-
-		if(!mScroller.isFinished()){
-			post(new Runnable(){
-				@Override
-				public void run() {
-					requestLayout();
-				}
-			});
-
-		}
 	}
 
+//	@Override
+//	protected synchronized void onLayout(boolean changed, int left, int top, int right, int bottom) {
+//		super.onLayout(changed, left, top, right, bottom);
+//
+//		
+//		
+//	}
+	
 	private void fillList(final int dx) {
 		int edge = 0;
 		View child = getChildAt(getChildCount()-1);
@@ -223,36 +209,36 @@ public class HorizontalListView extends AdapterView<ListAdapter> implements OnSc
 			edge = child.getRight();
 		}
 		fillListRight(edge, dx);
-
+		
 		edge = 0;
 		child = getChildAt(0);
 		if(child != null) {
 			edge = child.getLeft();
 		}
 		fillListLeft(edge, dx);
-
-
+		
+		
 	}
-
+	
 	private void fillListRight(int rightEdge, final int dx) {
 		while(rightEdge + dx < getWidth() && mRightViewIndex < mAdapter.getCount()) {
-
+			
 			View child = mAdapter.getView(mRightViewIndex, mRemovedViewQueue.poll(), this);
 			addAndMeasureChild(child, -1);
 			rightEdge += child.getMeasuredWidth();
-
+			
 			if(mRightViewIndex == mAdapter.getCount()-1) {
 				mMaxX = mCurrentX + rightEdge - getWidth();
 			}
-
+			
 			if (mMaxX < 0) {
 				mMaxX = 0;
 			}
 			mRightViewIndex++;
 		}
-
+		
 	}
-
+	
 	private void fillListLeft(int leftEdge, final int dx) {
 		while(leftEdge + dx > 0 && mLeftViewIndex >= 0) {
 			View child = mAdapter.getView(mLeftViewIndex, mRemovedViewQueue.poll(), this);
@@ -262,7 +248,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> implements OnSc
 			mDisplayOffset -= child.getMeasuredWidth();
 		}
 	}
-
+	
 	private void removeNonVisibleItems(final int dx) {
 		View child = getChildAt(0);
 		while(child != null && child.getRight() + dx <= 0) {
@@ -271,9 +257,9 @@ public class HorizontalListView extends AdapterView<ListAdapter> implements OnSc
 			removeViewInLayout(child);
 			mLeftViewIndex++;
 			child = getChildAt(0);
-
+			
 		}
-
+		
 		child = getChildAt(getChildCount()-1);
 		while(child != null && child.getLeft() + dx >= getWidth()) {
 			mRemovedViewQueue.offer(child);
@@ -282,7 +268,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> implements OnSc
 			child = getChildAt(getChildCount()-1);
 		}
 	}
-
+	
 	private void positionItems(final int dx) {
 		if(getChildCount() > 0){
 			mDisplayOffset += dx;
@@ -295,133 +281,58 @@ public class HorizontalListView extends AdapterView<ListAdapter> implements OnSc
 			}
 		}
 	}
-
-	public synchronized void scrollTo(int x) {
-		mScroller.startScroll(mNextX, 0, x - mNextX, 0);
-		requestLayout();
-	}
-
+	
+//	public void scrollTo(int x) {
+//		mScroller.startScroll(mNextX, 0, x - mNextX, 0);
+//		invalidate();
+//	}
+	
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
 		boolean handled = super.dispatchTouchEvent(ev);
 		handled |= mGesture.onTouchEvent(ev);
 		return handled;
 	}
-
-		
+	
 	protected boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-			float velocityY) {
-		synchronized(HorizontalListView.this){
+				float velocityY) {
+		synchronized(HorizontalListView2.this){
 			mScroller.fling(mNextX, 0, (int)-velocityX, 0, 0, mMaxX, 0, 0);
 		}
-		requestLayout();
-		if(mNextX <= 0 && mOnEdgeReached!= null){
-			mOnEdgeReached.onListEdgeReached(0);
-		}
-		if(mNextX >= mMaxX && mOnEdgeReached != null) {
-			mOnEdgeReached.onListEdgeReached(1);
-		}
+		invalidate();
+		
 		return true;
 	}
-
+	
 	protected boolean onDown(MotionEvent e) {
 		mScroller.forceFinished(true);
 		return true;
 	}
-
-	@SuppressLint("NewApi")
-	@Override
-	public boolean onInterceptTouchEvent(MotionEvent ev) {
-		switch (ev.getAction()) {
-		case MotionEvent.ACTION_DOWN:
-			// reset difference values
-			mDiffX = 0;
-			mDiffY = 0;
-
-			mLastX = ev.getX();
-			mLastY = ev.getY();
-			break;
-
-		case MotionEvent.ACTION_MOVE:
-			final float curX = ev.getX();
-			final float curY = ev.getY();
-			mDiffX += Math.abs(curX - mLastX);
-			mDiffY += Math.abs(curY - mLastY);
-			mLastX = curX;
-			mLastY = curY;
-
-			// don't intercept event, when user tries to scroll horizontally
-			if (!(mDiffX > mDiffY)) {
-				//ev.setAction(MotionEvent.ACTION_UP);
-				//return super.onInterceptTouchEvent(ev);
-				return false;
-			}
-			break;
-
-//		case MotionEvent.ACTION_UP:
-//			
-//			if(getChildCount() > 0){
-//				View child = getChildAt(0);
-//				//System.out.println(child.getScrollX());
-//				//System.out.println(child.getX());
-//				
-//				System.out.println(mCurrentX);
-//				//System.out.println(mNextX);
-//				//System.out.println(mMaxX);
-//				System.out.println(mDisplayOffset);
-//				scrollTo(mCurrentX + mDisplayOffset);
-//			}
-//
-		}
-
-		return super.onInterceptTouchEvent(ev);
-	} 	
-
+	
 	private OnGestureListener mOnGesture = new GestureDetector.SimpleOnGestureListener() {
 
 		@Override
 		public boolean onDown(MotionEvent e) {
-			return HorizontalListView.this.onDown(e);
+			return HorizontalListView2.this.onDown(e);
 		}
-		
 
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 				float velocityY) {
-			return HorizontalListView.this.onFling(e1, e2, velocityX, velocityY);
+			return HorizontalListView2.this.onFling(e1, e2, velocityX, velocityY);
 		}
-		
+
 		@Override
 		public boolean onScroll(MotionEvent e1, MotionEvent e2,
 				float distanceX, float distanceY) {
-
-			final ViewParent viewParent = getParent();
-			if (viewParent != null) {
-				CustomScrollView cs = (CustomScrollView)viewParent.getParent();
-				if (cs != null){
-					if (Math.abs(distanceX) > Math.abs(distanceY)){
-
-						//viewParent.requestDisallowInterceptTouchEvent(true);
-						viewParent.getParent().requestDisallowInterceptTouchEvent(true);
-						cs.setIsScrollable(false);
-					}
-					else {
-						viewParent.requestDisallowInterceptTouchEvent(false);
-
-					}
-					cs.setIsScrollable(true);
-				}
-			}
-			//System.out.println("X:" + distanceX +",Y:"+ distanceY);
-			//System.out.println(getChildAt(getFirstVisiblePosition()));
-
-			synchronized(HorizontalListView.this){
+			
+			synchronized(HorizontalListView2.this){
 				mNextX += (int)distanceX;
 			}
-			requestLayout();
-
+			invalidate();
+			
 			return true;
-		}	
+		}
 
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent e) {
@@ -429,18 +340,18 @@ public class HorizontalListView extends AdapterView<ListAdapter> implements OnSc
 				View child = getChildAt(i);
 				if (isEventWithinView(e, child)) {
 					if(mOnItemClicked != null){
-						mOnItemClicked.onItemClick(HorizontalListView.this, child, mLeftViewIndex + 1 + i, mAdapter.getItemId( mLeftViewIndex + 1 + i ));
+						mOnItemClicked.onItemClick(HorizontalListView2.this, child, mLeftViewIndex + 1 + i, mAdapter.getItemId( mLeftViewIndex + 1 + i ));
 					}
 					if(mOnItemSelected != null){
-						mOnItemSelected.onItemSelected(HorizontalListView.this, child, mLeftViewIndex + 1 + i, mAdapter.getItemId( mLeftViewIndex + 1 + i ));
+						mOnItemSelected.onItemSelected(HorizontalListView2.this, child, mLeftViewIndex + 1 + i, mAdapter.getItemId( mLeftViewIndex + 1 + i ));
 					}
 					break;
 				}
-
+				
 			}
 			return true;
 		}
-
+		
 		@Override
 		public void onLongPress(MotionEvent e) {
 			int childCount = getChildCount();
@@ -448,7 +359,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> implements OnSc
 				View child = getChildAt(i);
 				if (isEventWithinView(e, child)) {
 					if (mOnItemLongClicked != null) {
-						mOnItemLongClicked.onItemLongClick(HorizontalListView.this, child, mLeftViewIndex + 1 + i, mAdapter.getItemId(mLeftViewIndex + 1 + i));
+						mOnItemLongClicked.onItemLongClick(HorizontalListView2.this, child, mLeftViewIndex + 1 + i, mAdapter.getItemId(mLeftViewIndex + 1 + i));
 					}
 					break;
 				}
@@ -457,47 +368,18 @@ public class HorizontalListView extends AdapterView<ListAdapter> implements OnSc
 		}
 
 		private boolean isEventWithinView(MotionEvent e, View child) {
-			Rect viewRect = new Rect();
-			int[] childPosition = new int[2];
-			child.getLocationOnScreen(childPosition);
-			int left = childPosition[0];
-			int right = left + child.getWidth();
-			int top = childPosition[1];
-			int bottom = top + child.getHeight();
-			viewRect.set(left, top, right, bottom);
-			return viewRect.contains((int) e.getRawX(), (int) e.getRawY());
-		}
+            Rect viewRect = new Rect();
+            int[] childPosition = new int[2];
+            child.getLocationOnScreen(childPosition);
+            int left = childPosition[0];
+            int right = left + child.getWidth();
+            int top = childPosition[1];
+            int bottom = top + child.getHeight();
+            viewRect.set(left, top, right, bottom);
+            return viewRect.contains((int) e.getRawX(), (int) e.getRawY());
+        }
 	};
 
-	/**
-	 * Interface for client classes interested on listening the event of the list reaching an edge when
-	 * scrolling.
-	 */
-	public interface OnListEdgeReachedListener{
-		/**
-		 * Called then the list has been scrolled to an edge of it. It's to say, it has been
-		 * scrolled to the right most position (last item) or left most position (first item).
-		 * @param edge '0' if the list has reached the left most edge (first item) or '1' if the right most edge (last item)
-		 */
-		public void onListEdgeReached(int edge);
-	}
+	
 
-	public OnListEdgeReachedListener getOnListEdgeReachedListener() {
-		return mOnEdgeReached;
-	}
-
-	public void setOnListEdgeReachedListener(OnListEdgeReachedListener mOnReachEdgeListener) {
-		this.mOnEdgeReached = mOnReachEdgeListener;
-	}
-
-	@Override
-	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onScrollStateChanged(AbsListView view, int scrollState) {
-		System.out.println("SCROLL CHANGED");
-	}
 }
