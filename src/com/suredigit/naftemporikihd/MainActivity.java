@@ -481,10 +481,10 @@ public class MainActivity extends SherlockActivity  {
 
 						}
 					});
-					
-					
-					
-					
+
+
+
+
 					myLinList.addView(channTitleTV);
 					myLinList.addView(hListView);
 					myLinList.addView(spacerTV);
@@ -552,50 +552,51 @@ public class MainActivity extends SherlockActivity  {
 				final TextView title = (TextView) retval.findViewById(R.id.title);  
 				final ImageView thumb = (ImageView) retval.findViewById(R.id.image);
 
-				thumb.setOnTouchListener(new OnTouchListener()
-				{
-					@Override
-					public boolean onTouch(View v, MotionEvent event) {
-						switch (event.getAction()) {
+				if(android.os.Build.VERSION.SDK_INT > 10){
+					thumb.setOnTouchListener(new OnTouchListener()
+					{
+						@Override
+						public boolean onTouch(View v, MotionEvent event) {
+							switch (event.getAction()) {
 
 
-						case MotionEvent.ACTION_DOWN: {
-							title.setBackgroundColor(Color.parseColor("#950005"));
-							rect = new Rect(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
-							break;
-						}
-
-						case MotionEvent.ACTION_MOVE:{
-							//							Rect rect = new Rect();
-							//							rect.left = thumb.getLeft();
-							//							rect.top = thumb.getTop();
-							//							rect.bottom = thumb.getBottom();
-							//							rect.right = thumb.getRight();
-							//							System.out.println(rect.left+","+rect.top);
-
-
-
-							if(!rect.contains((int)event.getX(), (int)event.getY())) {
-								// Outside the bounds
-								title.setBackgroundColor(Color.parseColor("#CC000000"));
+							case MotionEvent.ACTION_DOWN: {
+								title.setBackgroundColor(Color.parseColor("#950005"));
+								rect = new Rect(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+								break;
 							}
-							break;        
-						}
 
-						case MotionEvent.ACTION_CANCEL: {
-							title.setBackgroundColor(Color.parseColor("#CC000000"));
-							break;
-						}
+							case MotionEvent.ACTION_MOVE:{
+								//							Rect rect = new Rect();
+								//							rect.left = thumb.getLeft();
+								//							rect.top = thumb.getTop();
+								//							rect.bottom = thumb.getBottom();
+								//							rect.right = thumb.getRight();
+								//							System.out.println(rect.left+","+rect.top);
 
-						case MotionEvent.ACTION_UP: {
-							title.setBackgroundColor(Color.parseColor("#CC000000"));
-							break;
-						}
-						}
-						return true;
-					}
-				});
 
+
+								if(!rect.contains((int)event.getX(), (int)event.getY())) {
+									// Outside the bounds
+									title.setBackgroundColor(Color.parseColor("#CC000000"));
+								}
+								break;        
+							}
+
+							case MotionEvent.ACTION_CANCEL: {
+								title.setBackgroundColor(Color.parseColor("#CC000000"));
+								break;
+							}
+
+							case MotionEvent.ACTION_UP: {
+								title.setBackgroundColor(Color.parseColor("#CC000000"));
+								break;
+							}
+							}
+							return true;
+						}
+					});
+				}
 
 
 				title.setText(article.getTitle());  

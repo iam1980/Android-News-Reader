@@ -21,8 +21,9 @@
   <body>
 $ 1.0.5
   % Version 1.0.5
-  _ 2013-02-
-    *    
+  _ 2013-02-24
+    * Fixed a bug that caused jittering on Gingerbread devices
+    * Small cosmetic enhancements 
 $ 1.0.4
   % Version 1.0.4
   _ 2013-02-19

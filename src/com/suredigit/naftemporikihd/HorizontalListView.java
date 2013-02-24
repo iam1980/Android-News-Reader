@@ -31,9 +31,11 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
@@ -329,7 +331,6 @@ public class HorizontalListView extends AdapterView<ListAdapter> implements OnSc
 		return true;
 	}
 
-	@SuppressLint("NewApi")
 	@Override
 	public boolean onInterceptTouchEvent(MotionEvent ev) {
 		switch (ev.getAction()) {
@@ -371,7 +372,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> implements OnSc
 //				System.out.println(mDisplayOffset);
 //				scrollTo(mCurrentX + mDisplayOffset);
 //			}
-//
+
 		}
 
 		return super.onInterceptTouchEvent(ev);
