@@ -71,7 +71,7 @@ public class MainActivity extends SherlockActivity  {
 	public static final String CHECKURL = BASEURL+ "/api/legacy/android/GetNews.aspx?&cat=999";
 	public static final String NEWSFILENAME = "new_file.xml";
 	public static final int SECONDSTOREFRESH = 600;
-	public static final int MAX_ARTICLES = 30;
+	public static final int MAX_ARTICLES = 25;
 	private static int CONN_TIMEOUT = 10000; //millis
 	
 	private FeedbackDialog mFeedbackDialog;
