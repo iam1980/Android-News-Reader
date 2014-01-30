@@ -24,7 +24,7 @@ $ 1.0.6
   _ 2014-01-30
     * Fixed a bug that caused the application to crash upon viewing certain categories
     * Removed double spacing in paragraphs
-    * Added feadback functionality 
+    * Added feedback functionality 
 $ 1.0.5
   % Version 1.0.5
   _ 2013-02-24
