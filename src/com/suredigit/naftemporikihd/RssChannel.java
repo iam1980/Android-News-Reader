@@ -106,6 +106,12 @@ public class RssChannel implements Parcelable{
 	//		this.hlist = hlist;
 	//	}
 
+	@Override
+	public String toString() {
+		return "RssChannel [title=" + title + ", url=" + url + ", html=" + html + ", enabled=" + enabled + ", articles=" + articles + "]";
+	}
 
+
+	
 
 }

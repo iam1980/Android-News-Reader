@@ -127,7 +127,7 @@ public class NaftemporikiParsers {
 
 					//text = text.replaceAll("&nbsp;", " ");
 					//text = text.replaceAll("\u00a0","");
-					text = text.replaceAll("(\r\n|\n)", "<br />");
+					//text = text.replaceAll("(\r\n|\n)", "<br />");
 					text = text.replaceAll("\t", "");
 					
 					

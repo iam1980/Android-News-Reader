@@ -60,6 +60,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.suredigit.inappfeedback.FeedbackDialog;
 
 
 public class MainActivity extends SherlockActivity  {
@@ -70,7 +71,10 @@ public class MainActivity extends SherlockActivity  {
 	public static final String CHECKURL = BASEURL+ "/api/legacy/android/GetNews.aspx?&cat=999";
 	public static final String NEWSFILENAME = "new_file.xml";
 	public static final int SECONDSTOREFRESH = 600;
+	public static final int MAX_ARTICLES = 30;
 	private static int CONN_TIMEOUT = 10000; //millis
+	
+	private FeedbackDialog mFeedbackDialog;
 
 	private boolean mHostIsReachable = false;
 
@@ -291,6 +295,12 @@ public class MainActivity extends SherlockActivity  {
 		imageDownloader.setMemSize(MemSize.ULTRA);
 
 	}
+	
+	@Override
+	public void onPause(){
+		super.onPause();
+		mFeedbackDialog.dismiss();
+	}
 
 	@Override
 	public void onStart() {
@@ -329,7 +339,7 @@ public class MainActivity extends SherlockActivity  {
 		if (cl.firstRun())
 			cl.getLogDialog().show();
 
-
+		mFeedbackDialog = new FeedbackDialog(MainActivity.this, "AF-6A9F3F933DFC-EE");
 		//int memClass = ( ( ActivityManager )context.getSystemService( Context.ACTIVITY_SERVICE ) ).getMemoryClass();
 		//int cacheSize = 1024 * 1024 * memClass / 8;
 	}
@@ -419,6 +429,19 @@ public class MainActivity extends SherlockActivity  {
 				} 
 				if (!(theChan.getArticles() == null)){
 					Collections.reverse((ArrayList<Article>) theChan.getArticles());
+					int articleCoun = theChan.getArticles().size();
+
+					
+					if (articleCoun > MAX_ARTICLES){
+						
+						for (int i=0;i<(articleCoun - MAX_ARTICLES);i++){
+							theChan.getArticles().remove(theChan.getArticles().size()-1);
+						}
+						
+					}
+
+					
+					
 					theChan.getArticles().add(new Article("DUMMY"));
 				}
 			}
@@ -642,9 +665,7 @@ public class MainActivity extends SherlockActivity  {
 
 			return true;			
 		case R.id.menu_about:
-
-			//FeedbackDialog myDialog = new FeedbackDialog(MainActivity.this,"APPID#()*");
-			//myDialog.show();
+		
 			Intent intent = new Intent(MainActivity.this, AboutFullscreenActivity.class);
 			startActivity(intent);
 
@@ -652,6 +673,10 @@ public class MainActivity extends SherlockActivity  {
 
 		case R.id.menu_changelog:
 			cl.getFullLogDialog().show();
+			return true;
+			
+		case R.id.menu_feedback:
+			mFeedbackDialog.show();
 			return true;
 
 		case R.id.menu_rate:
@@ -664,6 +689,9 @@ public class MainActivity extends SherlockActivity  {
 			}
 			return true;
 		}
+		
+
+		
 
 		return super.onOptionsItemSelected(item);
 	}

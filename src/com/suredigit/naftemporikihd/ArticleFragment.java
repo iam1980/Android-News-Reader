@@ -75,6 +75,7 @@ public final class ArticleFragment extends Fragment {
 		TextView tvDate = (TextView)v.findViewById(R.id.textViewDate);
 		TextView tvTitle = (TextView)v.findViewById(R.id.textViewTitle);
 		tvContent = (TextView)v.findViewById(R.id.textViewArticleContent);
+		tvContent.setPadding(0, 22, 0, 0);
 
 		ArticlesViewActivity pActivity = (ArticlesViewActivity) getActivity();
 
