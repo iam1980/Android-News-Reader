@@ -186,14 +186,14 @@ public class MainActivity extends SherlockActivity  {
 
 		ArrayList<RssChannel> defaultRssChannels = new ArrayList<RssChannel>();
 
-		defaultRssChannels.add(new RssChannel("ĞÏËÉÔÉÊÇ",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=2"));		
-		defaultRssChannels.add(new RssChannel("ÊÏÉÍÙÍÉÁ",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=3"));		
-		defaultRssChannels.add(new RssChannel("ÊÏÓÌÏÓ",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=4"));
-		defaultRssChannels.add(new RssChannel("ÏÉÊÏÍÏÌÉÁ & ÁÃÏÑÅÓ",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=1"));
-		defaultRssChannels.add(new RssChannel("ÁÈËÇÔÉÊÁ",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=5"));
-		defaultRssChannels.add(new RssChannel("ĞÏËÉÔÉÓÌÏÓ",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=6"));
-		defaultRssChannels.add(new RssChannel("ĞÅÑÉÂÁËËÏÍ",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=8"));
-		defaultRssChannels.add(new RssChannel("ÔÅ×ÍÏËÏÃÉÁ - ÅĞÉÓÔÇÌÇ",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=7"));
+		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=2"));		
+		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=3"));		
+		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=4"));
+		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ & ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=1"));
+		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=5"));
+		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=6"));
+		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=8"));
+		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=7"));
 		//		Gson gson = new Gson();
 		//		String jsonDef = gson.toJson(defaultRssChannels); 
 
@@ -237,13 +237,13 @@ public class MainActivity extends SherlockActivity  {
 
 				String oldTitle = myChan.getTitle().toUpperCase();
 
-				oldTitle = oldTitle.replaceAll("\u0386", "Á");
+				oldTitle = oldTitle.replaceAll("\u0386", "ï¿½");
 				oldTitle = oldTitle.replaceAll("\u0388", "E");
 				oldTitle = oldTitle.replaceAll("\u0389", "H");
 				oldTitle = oldTitle.replaceAll("\u038a", "I");
 				oldTitle = oldTitle.replaceAll("\u038c", "O");
 				oldTitle = oldTitle.replaceAll("\u038e", "Y");
-				oldTitle = oldTitle.replaceAll("\u038f", "Ù");
+				oldTitle = oldTitle.replaceAll("\u038f", "ï¿½");
 
 				myChan.setTitle(oldTitle);
 			}
@@ -266,14 +266,14 @@ public class MainActivity extends SherlockActivity  {
 	//	public static void loadChannels(){
 	//		SharedPreferences preferences = Singleton.getInstance().prefs;
 	//		ArrayList<RssChannel> defaultRssChannels = new ArrayList<RssChannel>();
-	//		defaultRssChannels.add(new RssChannel("Ïéêïíïìßá & Áãïñİò",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=1"));
-	//		defaultRssChannels.add(new RssChannel("ĞïëéôéêŞ",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=2"));		
-	//		defaultRssChannels.add(new RssChannel("Êïéíùíßá",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=3"));		
-	//		defaultRssChannels.add(new RssChannel("Êüóìïò",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=4"));
-	//		defaultRssChannels.add(new RssChannel("ÁèëçôéêÜ",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=5"));
-	//		defaultRssChannels.add(new RssChannel("Ğïëéôéóìüò",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=6"));
-	//		defaultRssChannels.add(new RssChannel("ĞåñéâÜëëïí",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=8"));
-	//		defaultRssChannels.add(new RssChannel("Ôå÷íïëïãßá - ÅğéóôŞìç",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=7"));
+	//		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ & ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=1"));
+	//		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=2"));		
+	//		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=3"));		
+	//		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=4"));
+	//		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=5"));
+	//		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=6"));
+	//		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=8"));
+	//		defaultRssChannels.add(new RssChannel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",BASEURL + "/api/legacy/android/GetNews.aspx?&cat=7"));
 	//		Gson gson = new Gson();
 	//		String jsonDef = gson.toJson(defaultRssChannels); 
 	//
@@ -339,7 +339,7 @@ public class MainActivity extends SherlockActivity  {
 		if (cl.firstRun())
 			cl.getLogDialog().show();
 
-		mFeedbackDialog = new FeedbackDialog(MainActivity.this, "AF-6A9F3F933DFC-EE");
+		mFeedbackDialog = new FeedbackDialog(MainActivity.this, "XX-XXXXXXXXX-XX");
 		//int memClass = ( ( ActivityManager )context.getSystemService( Context.ACTIVITY_SERVICE ) ).getMemoryClass();
 		//int cacheSize = 1024 * 1024 * memClass / 8;
 	}
@@ -378,7 +378,7 @@ public class MainActivity extends SherlockActivity  {
 	private void refreshChannels(){
 		if (mHostIsReachable){
 			mProgressDialog = new ProgressDialog(MainActivity.this);
-			mProgressDialog.setMessage("Ìåôáöüñôùóç ÅéäŞóåùí");
+			mProgressDialog.setMessage("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
 			mProgressDialog.setIndeterminate(false);
 			mProgressDialog.setCancelable(false);
 			mProgressDialog.setMax(getEnabledChanCount());
