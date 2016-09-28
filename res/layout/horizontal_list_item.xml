@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingRight="3dp" >
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="8dp"
+        android:background="#3f3f3f"
+        android:maxHeight="150dp"
+        android:maxWidth="150dp"
+        android:minHeight="150dp"
+        android:minWidth="150dp"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/image"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="8dp"
+        android:background="#CC000000"
+        android:gravity="top"
+        android:maxLines="4"
+        android:maxWidth="150dp"
+        android:minWidth="150dp"
+        android:paddingBottom="6dp"
+        android:paddingLeft="3dp"
+        android:paddingRight="3dp"
+        android:text="Νέες διοικήσεις"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="#e0e0e0"
+        android:textSize="13sp" />
+
+    <ImageView
+        android:id="@+id/imageViewEdge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="false"
+        android:layout_centerVertical="true"
+        android:maxHeight="150dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/edgelistview"
+        android:visibility="invisible" />
+
+</RelativeLayout>

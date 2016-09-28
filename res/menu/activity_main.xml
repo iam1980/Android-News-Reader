@@ -1,0 +1,42 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_about"
+        android:orderInCategory="103"
+        android:showAsAction="never"
+        android:title="@string/menu_about">
+    </item>
+    <item
+        android:id="@+id/menu_feedback"
+        android:orderInCategory="102"
+        android:showAsAction="never"
+        android:title="@string/menu_feedback">
+    </item>
+    <item
+        android:id="@+id/menu_changelog"
+        android:orderInCategory="101"
+        android:showAsAction="never"
+        android:title="Changelog">
+    </item>
+    <item
+        android:id="@+id/menu_rate"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="Rate me!">
+    </item>
+    <item
+        android:id="@+id/menu_rss"
+        android:icon="@drawable/ic_sysbar_quicksettings"
+        android:orderInCategory="99"
+        android:showAsAction="always"
+        android:title="Favorite Channels">
+    </item>
+    <item
+        android:id="@+id/menu_refresh"
+        android:icon="@drawable/ic_menu_refresh"
+        android:orderInCategory="98"
+        android:showAsAction="always"
+        android:title="refresh">
+    </item>
+
+</menu>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.suredigit.naftemporikihd"
+    android:versionCode="7"
+    android:versionName="@string/app_ver" >
+
+    <uses-sdk
+        android:minSdkVersion="10"
+        android:targetSdkVersion="17" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:name="com.suredigit.naftemporikihd.Singleton"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.Sherlock.NoActionBar" >
+        <activity
+            android:name="com.suredigit.naftemporikihd.MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Sherlock" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.suredigit.naftemporikihd.ArticlesViewActivity"
+            android:label="@string/title_activity_articles_view"
+            android:parentActivityName="com.suredigit.naftemporikihd.MainActivity"
+            android:theme="@style/Theme.Sherlock" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.suredigit.naftemporikihd.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.suredigit.naftemporikihd.SelectRssChannelsActivity"
+            android:label="Διαμόρφωση κατηγοριών"
+            android:parentActivityName="com.suredigit.naftemporikihd.MainActivity"
+            android:theme="@style/Theme.Sherlock" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.suredigit.naftemporikihd.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.suredigit.naftemporikihd.FragmentPagerSupport"
+            android:label="@string/title_activity_articles_view"
+            android:parentActivityName="com.suredigit.naftemporikihd.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.suredigit.naftemporikihd.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.suredigit.naftemporikihd.FullscreenActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_fullscreen"
+            android:parentActivityName="com.suredigit.naftemporikihd.ArticlesViewActivity"
+            android:theme="@style/FullscreenTheme" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.suredigit.naftemporikihd.ArticlesViewActivity" />
+        </activity>
+        <activity
+            android:name="com.suredigit.naftemporikihd.AboutActivity"
+            android:label="@string/title_activity_about"
+            android:parentActivityName="com.suredigit.naftemporikihd.MainActivity"
+            android:theme="@style/Theme.Sherlock" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.suredigit.naftemporikihd.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.suredigit.naftemporikihd.AboutFullscreenActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_about_fullscreen"
+            android:parentActivityName="com.suredigit.naftemporikihd.MainActivity"
+            android:theme="@style/FullscreenTheme" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.suredigit.naftemporikihd.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.suredigit.naftemporikihd.FullscreenPhotoViewerActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_fullscreen_photo_viewer"
+            android:parentActivityName="com.suredigit.naftemporikihd.ArticlesViewActivity"
+            android:theme="@style/FullscreenTheme" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.suredigit.naftemporikihd.ArticlesViewActivity" />
+        </activity>
+    </application>
+
+</manifest>

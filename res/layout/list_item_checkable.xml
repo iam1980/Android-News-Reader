@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.suredigit.naftemporikihd.CheckableLinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent"
+  android:layout_height="67dp"
+  android:orientation="horizontal">
+
+  <ImageView
+      android:id="@id/drag_handle"
+      android:layout_width="67dp"
+      android:layout_height="67dp"
+      android:layout_gravity="center_vertical"
+      android:layout_weight="0"
+      android:adjustViewBounds="false"
+      android:scaleType="center"
+      android:src="@drawable/drag_handle" />
+
+  <CheckedTextView
+      android:id="@+id/text"
+      android:layout_width="wrap_content"
+      android:layout_height="67dp"
+      android:layout_weight="1"
+      android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+      android:gravity="center_vertical"
+      android:paddingLeft="8dp"
+      android:paddingRight="8dp"
+      android:textAppearance="?android:attr/textAppearanceMedium" />
+
+</com.suredigit.naftemporikihd.CheckableLinearLayout>
